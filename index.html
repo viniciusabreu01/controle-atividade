@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Registro de temas e ações</title>
+<style>
+  body { margin: 0; }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
+
+  #pm-root {
+    --paper: #F6F5F2;
+    --surface: #FFFFFF;
+    --ink: #23282C;
+    --ink-soft: #767C82;
+    --ink-faint: #A3A8AC;
+    --line: #E3E0D8;
+    --chip: #EFEEEA;
+    --chip-ink: #2B2F33;
+    --accent: #3B6E8F;
+    --accent-soft: #E4ECEF;
+    --late: #B4433A;
+    --late-soft: #F6E4E1;
+    --done: #4C7A5B;
+    --done-soft: #E1EBE4;
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    padding: 22px;
+    min-height: 100vh;
+    max-width: 720px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  #pm-root * { box-sizing: border-box; }
+
+  .pm-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .pm-stats { font-size: 13px; color: var(--ink-soft); margin: 0 0 18px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .pm-stats .dot { color: var(--ink-faint); }
+  .pm-stats .n-late { color: var(--late); font-weight: 600; }
+
+  .pm-layout { display: flex; gap: 16px; align-items: flex-start; }
+  .pm-menu { width: 240px; flex-shrink: 0; }
+  .pm-detail { flex: 1; min-width: 0; }
+  @media (max-width: 620px) {
+    .pm-layout { flex-direction: column; }
+    .pm-menu { width: 100%; }
+  }
+
+  .pm-menu-item { background: var(--surface); border: 1px solid rgba(0,0,0,0.03); border-left: 3px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; box-shadow: 0 1px 2px rgba(30,30,25,0.04), 0 4px 10px rgba(30,30,25,0.04); }
+  .pm-menu-item.active { border-color: var(--accent); background: var(--accent-soft); }
+  .pm-menu-item.has-late { border-left-color: var(--late); }
+  .pm-menu-item.has-progress { border-left-color: var(--accent); }
+  .pm-menu-item.all-done { border-left-color: var(--done); background: var(--done-soft); opacity: 0.82; }
+  .pm-menu-item-title { font-size: 14.5px; font-weight: 600; margin-bottom: 8px; }
+  .pm-menu-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pm-badge { font-size: 11.5px; font-weight: 500; padding: 2px 7px; border-radius: 999px; }
+  .pm-badge.b-late { background: var(--late-soft); color: var(--late); }
+  .pm-badge.b-progress { background: var(--accent-soft); color: var(--accent); }
+  .pm-badge.b-done { background: var(--done-soft); color: var(--done); }
+
+  .pm-progress-track { background: var(--line); height: 4px; border-radius: 2px; margin: 2px 0 6px; overflow: hidden; }
+  .pm-progress-fill { height: 100%; border-radius: 2px; }
+  .pm-menu-pct-row { font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+  .pm-menu-done-text { font-size: 12px; color: var(--done); font-weight: 500; }
+
+  .pm-add-tema { background: none; border: 1px dashed var(--line); color: var(--ink-soft); font-size: 13.5px; padding: 10px; border-radius: 6px; cursor: pointer; font-family: inherit; width: 100%; text-align: center; }
+  .pm-add-tema:hover { border-color: var(--accent); color: var(--accent); }
+  .pm-new-tema-form { background: var(--surface); border: 1px solid var(--accent); border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+  .pm-new-tema-form input { font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; width: 100%; margin-bottom: 8px; }
+  .pm-new-tema-actions { display: flex; justify-content: flex-end; gap: 6px; }
+
+  .pm-footer { margin-top: 6px; text-align: right; }
+  .pm-reset { background: none; border: none; color: var(--ink-soft); font-size: 12px; cursor: pointer; text-decoration: underline; font-family: inherit; }
+  .pm-reset.confirming { color: var(--late); text-decoration: none; font-weight: 600; }
+
+  .pm-detail-card { background: var(--surface); border: 1px solid rgba(0,0,0,0.03); border-radius: 8px; padding: 16px 16px 12px; box-shadow: 0 1px 2px rgba(30,30,25,0.04), 0 6px 16px rgba(30,30,25,0.05); }
+  .pm-detail-empty { color: var(--ink-soft); font-size: 13.5px; text-align: center; padding: 40px 12px; }
+  .pm-back { background: none; border: none; color: var(--ink-soft); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; font-family: inherit; display: none; align-items: center; gap: 4px; }
+  .pm-back svg { width: 14px; height: 14px; }
+
+  .pm-detail-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .pm-tema-title-input { font-size: 16px; font-weight: 600; font-family: inherit; border: none; padding: 0; background: transparent; flex: 1; color: var(--ink); }
+  .pm-tema-title-input:focus { outline: none; border-bottom: 1px solid var(--accent); }
+  .pm-tema-del { background: none; border: none; color: var(--ink-faint); cursor: pointer; padding: 2px; display: flex; }
+  .pm-tema-del:hover { color: var(--late); }
+  .pm-tema-del.confirming { color: #fff; background: var(--late); border-radius: 4px; }
+  .pm-detail-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+  .pm-acao { padding: 9px 0; border-top: 1px solid var(--line); }
+  .pm-acao.first { border-top: none; padding-top: 0; }
+  .pm-acao-row { display: flex; align-items: flex-start; gap: 9px; }
+  .pm-check-wrap { position: relative; width: 17px; height: 17px; flex-shrink: 0; margin-top: 2px; }
+  .pm-check { width: 17px; height: 17px; margin: 0; cursor: pointer; appearance: none; border: 1.5px solid var(--ink-faint); border-radius: 4px; background: #fff; }
+  .pm-check:checked { background: var(--done); border-color: var(--done); }
+  .pm-check:checked::after { content: ''; position: absolute; left: 5px; top: 1.5px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+  .pm-acao-text-wrap { flex: 1; min-width: 0; font-size: 14px; line-height: 1.5; }
+  .pm-acao-label { color: var(--ink); }
+  .pm-acao-label.empty { color: var(--ink-faint); font-style: italic; }
+  .pm-chip { background: var(--chip); color: var(--chip-ink); border-radius: 4px; padding: 1px 7px; font-weight: 500; white-space: nowrap; }
+  .pm-acao.done .pm-acao-text-wrap { text-decoration: line-through; color: var(--ink-faint); }
+  .pm-acao.done .pm-chip { text-decoration: none; }
+
+  .pm-sub-row { display: flex; align-items: center; gap: 6px; margin: 5px 0 0 26px; font-size: 13px; color: var(--ink-soft); }
+  .pm-sub-bullet { color: var(--ink-faint); font-size: 10px; }
+  .pm-chip.date-late { background: var(--late-soft); color: var(--late); }
+  .pm-chip.date-progress { background: var(--accent-soft); color: var(--accent); }
+  .pm-chip.date-done { background: var(--done-soft); color: var(--done); }
+
+  .pm-acao-actions { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
+  .pm-icon-btn { background: none; border: none; color: var(--ink-faint); cursor: pointer; padding: 3px; display: flex; align-items: center; border-radius: 4px; }
+  .pm-icon-btn:hover { color: var(--accent); background: var(--accent-soft); }
+  .pm-icon-btn.danger:hover { color: var(--late); background: var(--late-soft); }
+  .pm-icon-btn svg { width: 14px; height: 14px; }
+
+  .pm-edit-form { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 6px; padding: 10px; margin-top: 2px; }
+  .pm-edit-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pm-edit-row input { font-family: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 4px; flex: 1; min-width: 110px; }
+  .pm-edit-actions { display: flex; justify-content: flex-end; gap: 6px; }
+  .pm-edit-actions button { font-family: inherit; font-size: 12.5px; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+  .pm-e-cancel { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); }
+  .pm-e-save { background: var(--ink); border: none; color: #fff; font-weight: 500; }
+
+  .pm-add-acao { background: none; border: none; color: var(--ink-soft); font-size: 13px; padding: 8px 0 2px; cursor: pointer; font-family: inherit; }
+  .pm-add-acao:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="pm-root">
+  <h1 class="pm-title">Registro de temas e ações</h1>
+  <div class="pm-stats" id="pm-stats">Carregando...</div>
+  <div class="pm-layout">
+    <div class="pm-menu" id="pm-menu">
+      <div id="pm-menu-list"></div>
+      <div id="pm-new-tema-wrap"></div>
+      <div class="pm-footer"><button class="pm-reset" id="pm-reset">Limpar tudo</button></div>
+    </div>
+    <div class="pm-detail" id="pm-detail"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'temas-acoes-dados';
+  const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
+  const ICON_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+  const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  const ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>';
+
+  let temas = [];
+  let editingId = null;
+  let addingTema = false;
+  let confirmTarget = null;
+  let confirmTimer = null;
+  let selectedTemaId = null;
+
+  const $ = (id) => document.getElementById(id);
+  const menuListEl = $('pm-menu-list');
+  const detailEl = $('pm-detail');
+
+  function uid(prefix) { return prefix + Date.now() + Math.random().toString(36).slice(2, 7); }
+
+  function daysUntil(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const target = new Date(y, m - 1, d);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return Math.round((target - now) / 86400000);
+  }
+
+  function statusOf(a) {
+    if (a.done) return 'done';
+    if (a.data && daysUntil(a.data) < 0) return 'late';
+    return 'progress';
+  }
+
+  function pctOf(tema) {
+    const total = tema.acoes.length;
+    if (!total) return 0;
+    const done = tema.acoes.filter((a) => a.done).length;
+    return Math.round((done / total) * 100);
+  }
+
+  function isFullyDone(tema) {
+    return tema.acoes.length > 0 && pctOf(tema) === 100;
+  }
+
+  function formatDuration(ms) {
+    const days = Math.max(0, Math.round(ms / 86400000));
+    if (days < 1) return 'menos de um dia';
+    if (days === 1) return '1 dia';
+    if (days < 14) return days + ' dias';
+    if (days < 60) return Math.round(days / 7) + ' semanas';
+    return Math.round(days / 30) + ' meses';
+  }
+
+  function syncCompletions() {
+    temas.forEach((t) => {
+      if (isFullyDone(t)) {
+        if (!t.concluidoEm) t.concluidoEm = Date.now();
+      } else if (t.concluidoEm) {
+        delete t.concluidoEm;
+      }
+    });
+  }
+
+  function fmtDateLong(iso) {
+    if (!iso) return '';
+    const meses = ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+    const [y, m, d] = iso.split('-');
+    return parseInt(d, 10) + ' de ' + meses[parseInt(m, 10) - 1] + ' de ' + y;
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ---------------- Persistência via localStorage (só neste navegador/dispositivo) ----------------
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      temas = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      temas = [];
+    }
+    let needsSave = false;
+    temas.forEach((t) => { if (!t.criadoEm) { t.criadoEm = Date.now(); needsSave = true; } });
+    renderAll();
+    if (needsSave) save();
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(temas));
+    } catch (e) {
+      console.error('Falha ao salvar', e);
+    }
+  }
+
+  function isNarrow() { return window.innerWidth < 620; }
+
+  function applyLayout() {
+    const menuEl = $('pm-menu');
+    if (isNarrow()) {
+      if (selectedTemaId) { menuEl.style.display = 'none'; detailEl.style.display = 'block'; }
+      else { menuEl.style.display = 'block'; detailEl.style.display = 'none'; }
+    } else {
+      menuEl.style.display = 'block';
+      detailEl.style.display = 'block';
+    }
+  }
+
+  function counts(tema) {
+    let late = 0, progress = 0, done = 0;
+    tema.acoes.forEach((a) => {
+      const s = statusOf(a);
+      if (s === 'late') late++; else if (s === 'progress') progress++; else done++;
+    });
+    return { late, progress, done };
+  }
+
+  function renderStats() {
+    let temasCount = temas.length, late = 0, progress = 0, done = 0;
+    temas.forEach((t) => { const c = counts(t); late += c.late; progress += c.progress; done += c.done; });
+    $('pm-stats').innerHTML =
+      temasCount + (temasCount === 1 ? ' tema' : ' temas') +
+      ' <span class="dot">·</span> ' + progress + ' em andamento' +
+      ' <span class="dot">·</span> ' + done + ' concluída' + (done !== 1 ? 's' : '') +
+      (late ? ' <span class="dot">·</span> <span class="n-late">' + late + ' atrasada' + (late !== 1 ? 's' : '') + '</span>' : '');
+  }
+
+  function badgesHtml(c) {
+    return (
+      (c.late ? '<span class="pm-badge b-late">' + c.late + ' atrasada' + (c.late > 1 ? 's' : '') + '</span>' : '') +
+      (c.progress ? '<span class="pm-badge b-progress">' + c.progress + ' em andamento</span>' : '') +
+      (c.done ? '<span class="pm-badge b-done">' + c.done + ' concluída' + (c.done > 1 ? 's' : '') + '</span>' : '')
+    );
+  }
+
+  function renderMenu() {
+    if (!temas.length) {
+      menuListEl.innerHTML = '<div class="pm-detail-empty" style="padding:20px 4px;">Nenhum tema ainda.</div>';
+    } else {
+      const ordered = temas.map((t, i) => ({ t, i })).sort((a, b) => {
+        const aDone = isFullyDone(a.t) ? 1 : 0;
+        const bDone = isFullyDone(b.t) ? 1 : 0;
+        if (aDone !== bDone) return aDone - bDone;
+        return a.i - b.i;
+      }).map((x) => x.t);
+
+      menuListEl.innerHTML = ordered.map((t) => {
+        const c = counts(t);
+        const pct = pctOf(t);
+        const done = isFullyDone(t);
+        let cls = '';
+        if (done) cls = 'all-done';
+        else if (c.late) cls = 'has-late';
+        else if (c.progress) cls = 'has-progress';
+        const barColor = done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)');
+
+        return (
+          '<div class="pm-menu-item ' + cls + (t.id === selectedTemaId ? ' active' : '') + '" data-select="' + t.id + '">' +
+          '<div class="pm-menu-item-title">' + escapeHtml(t.titulo) + '</div>' +
+          '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + barColor + ';"></div></div>' +
+          (done
+            ? '<div class="pm-menu-done-text">Concluído em ' + formatDuration(t.concluidoEm - t.criadoEm) + '</div>'
+            : '<div class="pm-menu-pct-row">' + pct + '% concluído</div><div class="pm-menu-badges">' + (badgesHtml(c) || '<span class="pm-badge" style="background:var(--chip); color:var(--ink-soft);">sem ações</span>') + '</div>')
+          +
+          '</div>'
+        );
+      }).join('');
+      menuListEl.querySelectorAll('[data-select]').forEach((el) =>
+        el.addEventListener('click', () => { selectedTemaId = el.getAttribute('data-select'); renderAll(); })
+      );
+    }
+    renderNewTemaForm();
+  }
+
+  function renderNewTemaForm() {
+    const wrap = $('pm-new-tema-wrap');
+    if (!addingTema) {
+      wrap.innerHTML = '<button class="pm-add-tema" id="pm-add-tema">+ Novo tema</button>';
+      $('pm-add-tema').addEventListener('click', () => { addingTema = true; renderNewTemaForm(); });
+      return;
+    }
+    wrap.innerHTML =
+      '<div class="pm-new-tema-form">' +
+      '<input type="text" id="pm-new-tema-input" placeholder="Nome do tema" />' +
+      '<div class="pm-new-tema-actions">' +
+      '<button class="pm-e-cancel" id="pm-new-tema-cancel">Cancelar</button>' +
+      '<button class="pm-e-save" id="pm-new-tema-save">Adicionar</button>' +
+      '</div></div>';
+    const input = $('pm-new-tema-input');
+    input.focus();
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmNewTema(); });
+    $('pm-new-tema-cancel').addEventListener('click', () => { addingTema = false; renderNewTemaForm(); });
+    $('pm-new-tema-save').addEventListener('click', confirmNewTema);
+  }
+
+  function confirmNewTema() {
+    const val = $('pm-new-tema-input').value.trim();
+    if (!val) { $('pm-new-tema-input').focus(); return; }
+    const novoTema = { id: uid('t'), titulo: val, acoes: [], criadoEm: Date.now() };
+    temas.push(novoTema);
+    addingTema = false;
+    selectedTemaId = novoTema.id;
+    renderAll();
+    save();
+  }
+
+  function updateResetButton() {
+    const btn = $('pm-reset');
+    if (confirmTarget === 'reset') { btn.textContent = 'Confirmar limpeza de tudo?'; btn.classList.add('confirming'); }
+    else { btn.textContent = 'Limpar tudo'; btn.classList.remove('confirming'); }
+  }
+
+  function requestConfirm(id, action) {
+    if (confirmTarget === id) {
+      clearTimeout(confirmTimer);
+      confirmTarget = null;
+      action();
+      return;
+    }
+    confirmTarget = id;
+    renderAll();
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(() => { confirmTarget = null; renderAll(); }, 3000);
+  }
+
+  function renderDetail() {
+    const tema = temas.find((t) => t.id === selectedTemaId);
+    if (!tema) {
+      detailEl.innerHTML = '<div class="pm-detail-empty">Selecione um tema à esquerda, ou crie um novo, para ver as ações.</div>';
+      applyLayout();
+      return;
+    }
+    const c = counts(tema);
+    const pct = pctOf(tema);
+    const done = isFullyDone(tema);
+    const acoesHtml = tema.acoes.length
+      ? tema.acoes.map((a, i) => acaoHtml(tema, a, i + 1)).join('')
+      : '<div class="pm-detail-empty" style="padding:16px 4px;">Nenhuma ação neste tema ainda.</div>';
+
+    detailEl.innerHTML =
+      '<button class="pm-back" id="pm-back" style="display:' + (isNarrow() ? 'flex' : 'none') + ';">' + ICON_BACK + ' Voltar aos temas</button>' +
+      '<div class="pm-detail-card">' +
+      '<div class="pm-detail-head">' +
+      '<input class="pm-tema-title-input" id="pm-tema-title" value="' + escapeHtml(tema.titulo) + '" />' +
+      '<button class="pm-tema-del ' + (confirmTarget === 'tema-' + tema.id ? 'confirming' : '') + '" id="pm-tema-del" title="' + (confirmTarget === 'tema-' + tema.id ? 'Clique novamente para confirmar' : 'Excluir tema') + '">' + ICON_X + '</button>' +
+      '</div>' +
+      '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + (done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)')) + ';"></div></div>' +
+      (done
+        ? '<div class="pm-menu-done-text" style="margin-bottom:12px;">Concluído em ' + formatDuration(tema.concluidoEm - tema.criadoEm) + '</div>'
+        : '<div class="pm-detail-badges"><span class="pm-menu-pct-row" style="margin:0;">' + pct + '% concluído</span>' + badgesHtml(c) + '</div>')
+      +
+      acoesHtml +
+      '<button class="pm-add-acao" id="pm-add-acao">+ Nova ação</button>' +
+      '</div>';
+
+    $('pm-back').addEventListener('click', () => { selectedTemaId = null; renderAll(); });
+    $('pm-tema-title').addEventListener('blur', (e) => renameTema(tema.id, e.target.value));
+    $('pm-tema-del').addEventListener('click', () => requestConfirm('tema-' + tema.id, () => removeTema(tema.id)));
+    $('pm-add-acao').addEventListener('click', () => addAcao(tema.id));
+
+    detailEl.querySelectorAll('[data-check]').forEach((el) =>
+      el.addEventListener('change', () => toggleDone(tema.id, el.getAttribute('data-check')))
+    );
+    detailEl.querySelectorAll('[data-edit]').forEach((el) =>
+      el.addEventListener('click', () => { editingId = el.getAttribute('data-edit'); renderDetail(); })
+    );
+    detailEl.querySelectorAll('[data-del-acao]').forEach((el) =>
+      el.addEventListener('click', () => removeAcao(tema.id, el.getAttribute('data-del-acao')))
+    );
+    detailEl.querySelectorAll('[data-save-edit]').forEach((el) =>
+      el.addEventListener('click', () => saveEdit(el.getAttribute('data-save-edit')))
+    );
+    detailEl.querySelectorAll('[data-cancel-edit]').forEach((el) =>
+      el.addEventListener('click', () => { editingId = null; renderDetail(); })
+    );
+
+    applyLayout();
+  }
+
+  function acaoHtml(tema, a, index) {
+    if (editingId === a.id) return editFormHtml(a, index);
+
+    const status = statusOf(a);
+    const dateChipClass = status === 'late' ? 'date-late' : status === 'progress' ? 'date-progress' : 'date-done';
+    const descHtml = a.descricao
+      ? escapeHtml(a.descricao)
+      : '<span class="pm-acao-label empty">clique em editar para preencher</span>';
+
+    return (
+      '<div class="pm-acao ' + (a.done ? 'done' : '') + (index === 1 ? ' first' : '') + '">' +
+      '<div class="pm-acao-row">' +
+      '<div class="pm-check-wrap"><input class="pm-check" type="checkbox" data-check="' + a.id + '" ' + (a.done ? 'checked' : '') + ' /></div>' +
+      '<div class="pm-acao-text-wrap"><span class="pm-acao-label">' + descHtml + '</span></div>' +
+      '<div class="pm-acao-actions">' +
+      '<button class="pm-icon-btn" data-edit="' + a.id + '" title="Editar">' + ICON_EDIT + '</button>' +
+      '<button class="pm-icon-btn danger" data-del-acao="' + a.id + '" title="Excluir">' + ICON_DEL + '</button>' +
+      '</div>' +
+      '</div>' +
+      (a.pessoa ? '<div class="pm-sub-row"><span class="pm-sub-bullet">●</span> Responsável: <span class="pm-chip">' + escapeHtml(a.pessoa) + '</span></div>' : '') +
+      (a.data ? '<div class="pm-sub-row"><span class="pm-sub-bullet">●</span> Data prevista: <span class="pm-chip ' + dateChipClass + '">' + fmtDateLong(a.data) + '</span></div>' : '') +
+      '</div>'
+    );
+  }
+
+  function editFormHtml(a, index) {
+    return (
+      '<div class="pm-acao">' +
+      '<div class="pm-edit-form">' +
+      '<div class="pm-edit-row">' +
+      '<input type="text" id="pm-f-desc-' + a.id + '" placeholder="Descrição da ação" value="' + escapeHtml(a.descricao) + '" style="flex-basis:100%;" />' +
+      '</div>' +
+      '<div class="pm-edit-row">' +
+      '<input type="text" id="pm-f-pessoa-' + a.id + '" placeholder="Responsável (opcional)" value="' + escapeHtml(a.pessoa) + '" />' +
+      '<input type="date" id="pm-f-data-' + a.id + '" value="' + (a.data || '') + '" />' +
+      '</div>' +
+      '<div class="pm-edit-actions">' +
+      '<button class="pm-e-cancel" data-cancel-edit="' + a.id + '">Cancelar</button>' +
+      '<button class="pm-e-save" data-save-edit="' + a.id + '">Salvar</button>' +
+      '</div>' +
+      '</div>' +
+      '</div>'
+    );
+  }
+
+  function toggleDone(temaId, acaoId) {
+    const tema = temas.find((t) => t.id === temaId);
+    const a = tema && tema.acoes.find((x) => x.id === acaoId);
+    if (a) a.done = !a.done;
+    renderAll();
+    save();
+  }
+
+  function removeAcao(temaId, acaoId) {
+    const tema = temas.find((t) => t.id === temaId);
+    if (tema) tema.acoes = tema.acoes.filter((x) => x.id !== acaoId);
+    renderAll();
+    save();
+  }
+
+  function removeTema(temaId) {
+    temas = temas.filter((t) => t.id !== temaId);
+    if (selectedTemaId === temaId) selectedTemaId = null;
+    renderAll();
+    save();
+  }
+
+  function renameTema(temaId, novoTitulo) {
+    const tema = temas.find((t) => t.id === temaId);
+    if (tema && novoTitulo.trim()) tema.titulo = novoTitulo.trim();
+    renderMenu();
+    save();
+  }
+
+  function addAcao(temaId) {
+    const tema = temas.find((t) => t.id === temaId);
+    if (!tema) return;
+    const novaAcao = { id: uid('a'), descricao: '', pessoa: '', data: '', done: false };
+    tema.acoes.push(novaAcao);
+    editingId = novaAcao.id;
+    renderDetail();
+  }
+
+  function saveEdit(acaoId) {
+    for (const tema of temas) {
+      const a = tema.acoes.find((x) => x.id === acaoId);
+      if (a) {
+        const desc = $('pm-f-desc-' + acaoId).value.trim();
+        if (!desc) { $('pm-f-desc-' + acaoId).focus(); return; }
+        a.descricao = desc;
+        a.pessoa = $('pm-f-pessoa-' + acaoId).value.trim();
+        a.data = $('pm-f-data-' + acaoId).value;
+        break;
+      }
+    }
+    editingId = null;
+    renderAll();
+    save();
+  }
+
+  function renderAll() {
+    syncCompletions();
+    updateResetButton();
+    renderStats();
+    renderMenu();
+    renderDetail();
+    applyLayout();
+  }
+
+  $('pm-reset').addEventListener('click', () => {
+    requestConfirm('reset', () => { temas = []; selectedTemaId = null; renderAll(); save(); });
+  });
+
+  window.addEventListener('resize', applyLayout);
+
+  load();
+})();
+</script>
+</body>
+</html>
