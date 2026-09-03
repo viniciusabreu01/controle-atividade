@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Registro de temas e ações</title>
 <style>
-  body { margin: 0; }
+  body { margin: 0; background: #E7E3D8; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 40px 16px; box-sizing: border-box; }
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
 
   #pm-root {
@@ -29,17 +29,20 @@
     background: var(--paper);
     color: var(--ink);
     font-family: 'Inter', sans-serif;
-    padding: 22px;
-    min-height: 100vh;
-    max-width: 720px;
-    margin: 0 auto;
+    padding: 26px 28px;
+    width: 100%;
+    max-width: 980px;
     box-sizing: border-box;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(40,35,25,0.10), 0 2px 8px rgba(40,35,25,0.06);
   }
   #pm-root * { box-sizing: border-box; }
 
-  .pm-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; margin: 0 0 14px; letter-spacing: -0.01em; }
+  .pm-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .pm-logo { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .pm-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin: 0; letter-spacing: -0.01em; }
 
-  .pm-navtabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .pm-navtabs { display: flex; gap: 4px; margin: 14px 0 20px; border-bottom: 1px solid var(--line); }
   .pm-navtab { background: none; border: none; font-family: inherit; font-size: 14px; color: var(--ink-soft); padding: 9px 14px; cursor: pointer; border-radius: 6px 6px 0 0; margin-bottom: -1px; border-bottom: 2px solid transparent; }
   .pm-navtab.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
   .pm-navtab:hover:not(.active) { color: var(--accent); }
@@ -71,19 +74,42 @@
   .pm-stats .n-late { color: var(--late); font-weight: 600; }
 
   .pm-layout { display: flex; gap: 16px; align-items: flex-start; }
-  .pm-menu { width: 240px; flex-shrink: 0; }
+  .pm-menu { width: 300px; flex-shrink: 0; }
   .pm-detail { flex: 1; min-width: 0; }
   @media (max-width: 620px) {
     .pm-layout { flex-direction: column; }
     .pm-menu { width: 100%; }
   }
 
-  .pm-menu-item { background: var(--surface); border: 1px solid rgba(0,0,0,0.03); border-left: 3px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; box-shadow: 0 1px 2px rgba(30,30,25,0.04), 0 4px 10px rgba(30,30,25,0.04); }
-  .pm-menu-item.active { border-color: var(--accent); background: var(--accent-soft); }
+  .pm-menu-item { background: var(--surface); border: 1px solid rgba(0,0,0,0.03); border-left: 3px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(30,30,25,0.04), 0 4px 10px rgba(30,30,25,0.04); position: relative; }
+  .pm-menu-item.active { border-color: var(--accent); }
   .pm-menu-item.has-late { border-left-color: var(--late); }
   .pm-menu-item.has-progress { border-left-color: var(--accent); }
-  .pm-menu-item.all-done { border-left-color: var(--done); background: var(--done-soft); opacity: 0.82; }
-  .pm-menu-item-title { font-size: 14.5px; font-weight: 600; margin-bottom: 8px; }
+  .pm-menu-item.all-done { border-left-color: var(--done); background: var(--done-soft); opacity: 0.85; }
+  .pm-menu-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .pm-menu-item-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pm-menu-item-icons { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .pm-chevron { display: flex; color: var(--ink-faint); transition: transform 0.15s; }
+  .pm-chevron svg { width: 13px; height: 13px; }
+  .pm-chevron.up { transform: rotate(180deg); }
+  .pm-menu-item-progress { display: flex; align-items: center; gap: 8px; }
+  .pm-menu-pct { font-size: 11px; color: var(--ink-soft); flex-shrink: 0; }
+  .pm-menu-status { font-size: 11.5px; font-weight: 500; margin-top: 5px; }
+
+  .pm-tema-tree-wrap { margin-bottom: 6px; }
+  .pm-sub-tree { margin: 4px 2px 2px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .pm-sub-row-nav { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; background: var(--paper); border: 1px solid var(--line); cursor: pointer; font-size: 12.5px; color: var(--ink); }
+  .pm-sub-row-nav.active { border-color: var(--accent); background: var(--accent-soft); }
+  .pm-sub-row-nav:hover { border-color: var(--accent); }
+  .pm-sub-row-pct { font-size: 11px; color: var(--ink-soft); flex-shrink: 0; }
+  .pm-add-subtema-inline { background: none; border: none; color: var(--ink-soft); font-size: 12.5px; padding: 4px 10px; cursor: pointer; font-family: inherit; text-align: left; }
+  .pm-add-subtema-inline:hover { color: var(--accent); }
+
+  .pm-link-panel { background: var(--surface); border: 1px solid var(--accent); border-radius: 6px; padding: 8px; margin-top: 8px; }
+  .pm-link-panel-label { font-size: 11.5px; color: var(--ink-soft); margin-bottom: 4px; }
+  .pm-link-option { font-size: 13px; padding: 6px 6px; border-radius: 4px; cursor: pointer; }
+  .pm-link-option:hover { background: var(--accent-soft); color: var(--accent); }
+  .pm-link-panel-empty { font-size: 12.5px; color: var(--ink-soft); padding: 4px 0; }
   .pm-menu-badges { display: flex; gap: 6px; flex-wrap: wrap; }
   .pm-badge { font-size: 11.5px; font-weight: 500; padding: 2px 7px; border-radius: 999px; }
   .pm-badge.b-late { background: var(--late-soft); color: var(--late); }
@@ -133,18 +159,24 @@
   .pm-acao-text-wrap { flex: 1; min-width: 0; font-size: 14px; line-height: 1.5; }
   .pm-acao-label { color: var(--ink); }
   .pm-acao-label.empty { color: var(--ink-faint); font-style: italic; }
-  .pm-chip { background: var(--chip); color: var(--chip-ink); border-radius: 4px; padding: 1px 7px; font-weight: 500; white-space: nowrap; }
   .pm-acao.done .pm-acao-text-wrap { text-decoration: line-through; color: var(--ink-faint); }
-  .pm-acao.done .pm-chip { text-decoration: none; }
+  .pm-acao.done .pm-acao-chips { text-decoration: none; opacity: 0.7; }
 
-  .pm-sub-row { display: flex; align-items: center; gap: 6px; margin: 5px 0 0 26px; font-size: 13px; color: var(--ink-soft); }
-  .pm-sub-bullet { color: var(--ink-faint); font-size: 10px; }
-  .pm-chip.date-late { background: var(--late-soft); color: var(--late); }
-  .pm-chip.date-progress { background: var(--accent-soft); color: var(--accent); }
-  .pm-chip.date-done { background: var(--done-soft); color: var(--done); }
+  .pm-acao-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .pm-chip-mini { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; padding: 2px 7px 2px 6px; border-radius: 4px; background: var(--chip); color: var(--chip-ink); white-space: nowrap; }
+  .pm-chip-mini svg { width: 11px; height: 11px; flex-shrink: 0; }
+  .pm-chip-mini.date-late { background: var(--late-soft); color: var(--late); }
+  .pm-chip-mini.date-progress { background: var(--accent-soft); color: var(--accent); }
+  .pm-chip-mini.date-done { background: var(--done-soft); color: var(--done); }
 
-  .pm-acao-actions { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
-  .pm-icon-btn { background: none; border: none; color: var(--ink-faint); cursor: pointer; padding: 3px; display: flex; align-items: center; border-radius: 4px; }
+  .pm-kebab-wrap { position: relative; margin-left: auto; flex-shrink: 0; }
+  .pm-kebab-menu { position: absolute; right: 0; top: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.10); min-width: 150px; z-index: 5; overflow: hidden; }
+  .pm-kebab-menu button { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 13px; background: none; border: none; cursor: pointer; color: var(--ink); font-family: inherit; }
+  .pm-kebab-menu button:hover { background: var(--accent-soft); }
+  .pm-kebab-menu button.danger { color: var(--late); }
+  .pm-kebab-menu button.danger:hover { background: var(--late-soft); }
+  .pm-kebab-menu button[disabled] { opacity: 0.35; cursor: default; pointer-events: none; }
+  .pm-kebab-menu .divider { border-top: 1px solid var(--line); }
   .pm-icon-btn:hover { color: var(--accent); background: var(--accent-soft); }
   .pm-icon-btn.danger:hover { color: var(--late); background: var(--late-soft); }
   .pm-icon-btn svg { width: 14px; height: 14px; }
@@ -174,7 +206,10 @@
 <body>
 
 <div id="pm-root">
-  <h1 class="pm-title">Registro de temas e ações</h1>
+  <div class="pm-header">
+    <div class="pm-logo">R</div>
+    <h1 class="pm-title">Registro de temas e ações</h1>
+  </div>
   <div class="pm-navtabs" id="pm-navtabs">
     <button class="pm-navtab" data-tab="painel">Painel</button>
     <button class="pm-navtab" data-tab="temas">Temas</button>
@@ -210,6 +245,11 @@
   const ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   const ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
   const ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>';
+  const ICON_CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  const ICON_PERSON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg>';
+  const ICON_CALENDAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+  const ICON_LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l6-6M10 8l1-1a3 3 0 1 1 4 4l-1 1M14 16l-1 1a3 3 0 1 1-4-4l1-1"/></svg>';
+  const ICON_KEBAB = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
 
   let temas = [];
   let editingId = null;
@@ -222,6 +262,9 @@
   let activeTab = 'painel';
   let searchQuery = '';
   let draggedAcaoId = null;
+  let openKebabId = null;
+  let linkingTemaId = null;
+  let mobileMenuOpen = false;
 
   const $ = (id) => document.getElementById(id);
   const menuListEl = $('pm-menu-list');
@@ -348,7 +391,7 @@
   function applyLayout() {
     const menuEl = $('pm-menu');
     if (isNarrow()) {
-      if (selectedTemaId) { menuEl.style.display = 'none'; detailEl.style.display = 'block'; }
+      if (selectedTemaId && !mobileMenuOpen) { menuEl.style.display = 'none'; detailEl.style.display = 'block'; }
       else { menuEl.style.display = 'block'; detailEl.style.display = 'none'; }
     } else {
       menuEl.style.display = 'block';
@@ -521,12 +564,13 @@
     return (
       '<div class="pm-painel-row" data-goto-tema="' + temaId + '" data-goto-sub="' + (subtemaId || '') + '">' +
       '<span class="pm-painel-row-text">' + escapeHtml(a.descricao || '(sem descrição)') +
-      (a.pessoa ? ' <span class="pm-chip">' + escapeHtml(a.pessoa) + '</span>' : '') + '</span>' +
+      (a.pessoa ? ' <span class="pm-chip-mini">' + ICON_PERSON + escapeHtml(a.pessoa) + '</span>' : '') + '</span>' +
       '<span class="pm-tema-badge">' + escapeHtml(label) + '</span>' +
-      (a.data ? '<span class="pm-chip ' + dateChipClass + '">' + fmtDateLong(a.data) + '</span>' : '') +
+      (a.data ? '<span class="pm-chip-mini ' + dateChipClass + '">' + ICON_CALENDAR + fmtDateLong(a.data) + '</span>' : '') +
       '</div>'
     );
   }
+
 
   function renderMenu() {
     if (!temas.length) {
@@ -539,32 +583,166 @@
         return a.i - b.i;
       }).map((x) => x.t);
 
-      menuListEl.innerHTML = ordered.map((t) => {
-        const c = counts(t);
-        const pct = pctOf(t);
-        const done = isFullyDone(t);
-        let cls = '';
-        if (done) cls = 'all-done';
-        else if (c.late) cls = 'has-late';
-        else if (c.progress) cls = 'has-progress';
-        const barColor = done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)');
+      menuListEl.innerHTML = ordered.map((t) => temaTreeHtml(t)).join('');
 
-        return (
-          '<div class="pm-menu-item ' + cls + (t.id === selectedTemaId ? ' active' : '') + '" data-select="' + t.id + '">' +
-          '<div class="pm-menu-item-title">' + escapeHtml(t.titulo) + '</div>' +
-          '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + barColor + ';"></div></div>' +
-          (done
-            ? '<div class="pm-menu-done-text">Concluído em ' + formatDuration(t.concluidoEm - t.criadoEm) + '</div>'
-            : '<div class="pm-menu-pct-row">' + pct + '% concluído</div><div class="pm-menu-badges">' + (badgesHtml(c) || '<span class="pm-badge" style="background:var(--chip); color:var(--ink-soft);">sem ações</span>') + '</div>')
-          +
-          '</div>'
-        );
-      }).join('');
       menuListEl.querySelectorAll('[data-select]').forEach((el) =>
-        el.addEventListener('click', () => { selectedTemaId = el.getAttribute('data-select'); selectedSubtemaId = null; renderAll(); })
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('[data-link-tema], [data-link-target], .pm-link-panel, [data-select-sub]')) return;
+          selectedTemaId = el.getAttribute('data-select');
+          selectedSubtemaId = null;
+          mobileMenuOpen = false;
+          renderAll();
+        })
       );
+      menuListEl.querySelectorAll('[data-select-sub]').forEach((el) =>
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const [temaId, subId] = el.getAttribute('data-select-sub').split(':');
+          selectedTemaId = temaId;
+          selectedSubtemaId = subId;
+          mobileMenuOpen = false;
+          renderAll();
+        })
+      );
+      menuListEl.querySelectorAll('[data-link-tema]').forEach((el) =>
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = el.getAttribute('data-link-tema');
+          linkingTemaId = linkingTemaId === id ? null : id;
+          renderMenu();
+        })
+      );
+      menuListEl.querySelectorAll('[data-link-target]').forEach((el) =>
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const [temaId, targetId] = el.getAttribute('data-link-target').split(':');
+          convertTemaToSubtema(temaId, targetId);
+        })
+      );
+      menuListEl.querySelectorAll('[data-add-subtema-inline]').forEach((el) =>
+        el.addEventListener('click', (e) => { e.stopPropagation(); addingSubtema = true; renderMenu(); })
+      );
+      wireAddSubtemaControl();
     }
     renderNewTemaForm();
+  }
+
+  function temaTreeHtml(t) {
+    const c = counts(t);
+    const pct = pctOf(t);
+    const done = isFullyDone(t);
+    let cls = '';
+    if (done) cls = 'all-done';
+    else if (c.late) cls = 'has-late';
+    else if (c.progress) cls = 'has-progress';
+    const barColor = done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)');
+    const expanded = t.id === selectedTemaId;
+    const statusLine = done
+      ? '<div class="pm-menu-status" style="color:var(--done);">Concluído em ' + formatDuration(t.concluidoEm - t.criadoEm) + '</div>'
+      : (c.late ? '<div class="pm-menu-status" style="color:var(--late);">' + c.late + ' atrasada' + (c.late > 1 ? 's' : '') + '</div>' : '');
+
+    const card =
+      '<div class="pm-menu-item ' + cls + (expanded ? ' active' : '') + '" data-select="' + t.id + '">' +
+      '<div class="pm-menu-item-top">' +
+      '<span class="pm-menu-item-title">' + escapeHtml(t.titulo) + '</span>' +
+      '<span class="pm-menu-item-icons">' +
+      (temas.length > 1 ? '<button class="pm-icon-btn" data-link-tema="' + t.id + '" title="Tornar subtema de...">' + ICON_LINK + '</button>' : '') +
+      '<span class="pm-chevron ' + (expanded ? 'up' : '') + '">' + ICON_CHEVRON + '</span>' +
+      '</span>' +
+      '</div>' +
+      '<div class="pm-menu-item-progress">' +
+      '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + barColor + ';"></div></div>' +
+      '<span class="pm-menu-pct">' + pct + '%</span>' +
+      '</div>' +
+      statusLine +
+      (temas.length > 1 && linkingTemaId === t.id ? linkPanelHtml(t) : '') +
+      '</div>';
+
+    if (!expanded) return '<div class="pm-tema-tree-wrap">' + card + '</div>';
+
+    const subtemas = t.subtemas || [];
+    const subtreeHtml = subtemas.length
+      ? '<div class="pm-sub-tree">' + subtemas.map((s) => subtemaRowHtml(t, s)).join('') + addSubtemaControlHtml() + '</div>'
+      : '<div class="pm-sub-tree">' + addSubtemaControlHtml() + '</div>';
+
+    return '<div class="pm-tema-tree-wrap">' + card + subtreeHtml + '</div>';
+  }
+
+  function subtemaRowHtml(t, s) {
+    const pct = pctOf(s);
+    const active = s.id === selectedSubtemaId;
+    return (
+      '<div class="pm-sub-row-nav ' + (active ? 'active' : '') + '" data-select-sub="' + t.id + ':' + s.id + '">' +
+      '<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escapeHtml(s.titulo) + '</span>' +
+      '<span class="pm-sub-row-pct">' + pct + '%</span>' +
+      '</div>'
+    );
+  }
+
+  function linkPanelHtml(t) {
+    const others = temas.filter((x) => x.id !== t.id);
+    if (!others.length) {
+      return '<div class="pm-link-panel"><div class="pm-link-panel-empty">Crie outro tema primeiro.</div></div>';
+    }
+    return (
+      '<div class="pm-link-panel">' +
+      '<div class="pm-link-panel-label">Tornar subtema de:</div>' +
+      others.map((o) => '<div class="pm-link-option" data-link-target="' + t.id + ':' + o.id + '">' + escapeHtml(o.titulo) + '</div>').join('') +
+      '</div>'
+    );
+  }
+
+  function convertTemaToSubtema(temaId, targetId) {
+    const idx = temas.findIndex((t) => t.id === temaId);
+    const target = temas.find((t) => t.id === targetId);
+    if (idx === -1 || !target) return;
+    const tema = temas[idx];
+    if (!target.subtemas) target.subtemas = [];
+    const novoSub = { id: uid('s'), titulo: tema.titulo, acoes: tema.acoes, criadoEm: tema.criadoEm };
+    target.subtemas.push(novoSub);
+    temas.splice(idx, 1);
+    linkingTemaId = null;
+    selectedTemaId = targetId;
+    selectedSubtemaId = novoSub.id;
+    renderAll();
+    save();
+  }
+
+  function addSubtemaControlHtml() {
+    if (!addingSubtema) {
+      return '<button class="pm-add-subtema-inline" data-add-subtema-inline>+ Subtema</button>';
+    }
+    return (
+      '<div class="pm-new-tema-form" style="margin:2px 0 0;">' +
+      '<input type="text" id="pm-new-subtema-input" placeholder="Nome do subtema" />' +
+      '<div class="pm-new-tema-actions">' +
+      '<button class="pm-e-cancel" id="pm-new-subtema-cancel">Cancelar</button>' +
+      '<button class="pm-e-save" id="pm-new-subtema-save">Adicionar</button>' +
+      '</div></div>'
+    );
+  }
+
+  function wireAddSubtemaControl() {
+    const input = $('pm-new-subtema-input');
+    if (!input) return;
+    input.focus();
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmNewSubtema(selectedTemaId); });
+    $('pm-new-subtema-cancel').addEventListener('click', () => { addingSubtema = false; renderMenu(); });
+    $('pm-new-subtema-save').addEventListener('click', () => confirmNewSubtema(selectedTemaId));
+  }
+
+  function confirmNewSubtema(temaId) {
+    const val = $('pm-new-subtema-input').value.trim();
+    if (!val) { $('pm-new-subtema-input').focus(); return; }
+    const tema = temas.find((t) => t.id === temaId);
+    if (!tema) return;
+    if (!tema.subtemas) tema.subtemas = [];
+    const novo = { id: uid('s'), titulo: val, acoes: [], criadoEm: Date.now() };
+    tema.subtemas.push(novo);
+    addingSubtema = false;
+    selectedSubtemaId = novo.id;
+    renderAll();
+    save();
   }
 
   function renderNewTemaForm() {
@@ -641,13 +819,6 @@
       ? tema.acoes.map((a, i) => acaoHtml(null, a, i + 1, tema.acoes.length)).join('')
       : '<div class="pm-detail-empty" style="padding:10px 4px;">Nenhuma ação direta neste tema.</div>';
 
-    const orderedSubtemas = tema.subtemas.map((s, i) => ({ s, i })).sort((a, b) => {
-      const ad = isFullyDone(a.s) ? 1 : 0, bd = isFullyDone(b.s) ? 1 : 0;
-      if (ad !== bd) return ad - bd;
-      return a.i - b.i;
-    }).map((x) => x.s);
-    const subtemasHtml = orderedSubtemas.map((s) => subtemaCardHtml(s)).join('');
-
     detailEl.innerHTML =
       '<button class="pm-back" id="pm-back" style="display:' + (isNarrow() ? 'flex' : 'none') + ';">' + ICON_BACK + ' Voltar aos temas</button>' +
       '<div class="pm-detail-card">' +
@@ -663,17 +834,12 @@
       '<p class="pm-section-title" style="margin-top:0;">Ações diretas</p>' +
       directAcoesHtml +
       '<button class="pm-add-acao" id="pm-add-acao">+ Nova ação</button>' +
-      '<p class="pm-section-title">Subtemas</p>' +
-      subtemasHtml +
-      addSubtemaControlHtml() +
       '</div>';
 
-    $('pm-back').addEventListener('click', () => { selectedTemaId = null; renderAll(); });
+    $('pm-back').addEventListener('click', () => { mobileMenuOpen = true; renderAll(); });
     $('pm-tema-title').addEventListener('blur', (e) => renameTema(tema.id, e.target.value));
     $('pm-tema-del').addEventListener('click', () => requestConfirm('tema-' + tema.id, () => removeTema(tema.id)));
     $('pm-add-acao').addEventListener('click', () => addAcao(tema.id, null));
-    wireAddSubtemaControl(tema.id);
-    wireSubtemaCards(tema.id);
     attachAcaoListeners(tema);
 
     applyLayout();
@@ -688,8 +854,9 @@
       : '<div class="pm-detail-empty" style="padding:16px 4px;">Nenhuma ação neste subtema ainda.</div>';
 
     detailEl.innerHTML =
-      '<button class="pm-back" id="pm-back-sub" style="display:flex;">' + ICON_BACK + ' ' + escapeHtml(tema.titulo) + '</button>' +
+      '<button class="pm-back" id="pm-back" style="display:' + (isNarrow() ? 'flex' : 'none') + ';">' + ICON_BACK + ' Voltar aos temas</button>' +
       '<div class="pm-detail-card">' +
+      '<div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">' + escapeHtml(tema.titulo) + '</div>' +
       '<div class="pm-detail-head">' +
       '<input class="pm-tema-title-input" id="pm-subtema-title" value="' + escapeHtml(subtema.titulo) + '" />' +
       '<button class="pm-tema-del ' + (confirmTarget === 'subtema-' + subtema.id ? 'confirming' : '') + '" id="pm-subtema-del" title="' + (confirmTarget === 'subtema-' + subtema.id ? 'Clique novamente para confirmar' : 'Excluir subtema') + '">' + ICON_X + '</button>' +
@@ -703,7 +870,7 @@
       '<button class="pm-add-acao" id="pm-add-acao">+ Nova ação</button>' +
       '</div>';
 
-    $('pm-back-sub').addEventListener('click', () => { selectedSubtemaId = null; renderAll(); });
+    $('pm-back').addEventListener('click', () => { mobileMenuOpen = true; renderAll(); });
     $('pm-subtema-title').addEventListener('blur', (e) => renameSubtema(tema.id, subtema.id, e.target.value));
     $('pm-subtema-del').addEventListener('click', () => requestConfirm('subtema-' + subtema.id, () => removeSubtema(tema.id, subtema.id)));
     $('pm-add-acao').addEventListener('click', () => addAcao(tema.id, subtema.id));
@@ -712,83 +879,17 @@
     applyLayout();
   }
 
-  function subtemaCardHtml(s) {
-    const c = counts(s);
-    const pct = pctOf(s);
-    const done = isFullyDone(s);
-    let cls = '';
-    if (done) cls = 'all-done'; else if (c.late) cls = 'has-late'; else if (c.progress) cls = 'has-progress';
-    const barColor = done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)');
-    return (
-      '<div class="pm-sub-card ' + cls + '" data-open-sub="' + s.id + '">' +
-      '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">' +
-      '<div class="pm-menu-item-title" style="margin-bottom:8px;">' + escapeHtml(s.titulo) + '</div>' +
-      '<button class="pm-icon-btn ' + (confirmTarget === 'subtema-' + s.id ? 'confirming' : '') + '" data-del-subtema="' + s.id + '" title="Excluir subtema">' + ICON_X + '</button>' +
-      '</div>' +
-      '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + barColor + ';"></div></div>' +
-      (done
-        ? '<div class="pm-menu-done-text">Concluído em ' + formatDuration(s.concluidoEm - s.criadoEm) + '</div>'
-        : '<div class="pm-menu-pct-row">' + pct + '% concluído</div><div class="pm-menu-badges">' + (badgesHtml(c) || '<span class="pm-badge" style="background:var(--chip); color:var(--ink-soft);">sem ações</span>') + '</div>')
-      +
-      '</div>'
-    );
-  }
-
-  function addSubtemaControlHtml() {
-    if (!addingSubtema) {
-      return '<button class="pm-add-tema" id="pm-add-subtema">+ Novo subtema</button>';
-    }
-    return (
-      '<div class="pm-new-tema-form">' +
-      '<input type="text" id="pm-new-subtema-input" placeholder="Nome do subtema" />' +
-      '<div class="pm-new-tema-actions">' +
-      '<button class="pm-e-cancel" id="pm-new-subtema-cancel">Cancelar</button>' +
-      '<button class="pm-e-save" id="pm-new-subtema-save">Adicionar</button>' +
-      '</div></div>'
-    );
-  }
-
-  function wireAddSubtemaControl(temaId) {
-    if (!addingSubtema) {
-      $('pm-add-subtema').addEventListener('click', () => { addingSubtema = true; renderDetail(); });
-    } else {
-      const input = $('pm-new-subtema-input');
-      input.focus();
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmNewSubtema(temaId); });
-      $('pm-new-subtema-cancel').addEventListener('click', () => { addingSubtema = false; renderDetail(); });
-      $('pm-new-subtema-save').addEventListener('click', () => confirmNewSubtema(temaId));
-    }
-  }
-
-  function confirmNewSubtema(temaId) {
-    const val = $('pm-new-subtema-input').value.trim();
-    if (!val) { $('pm-new-subtema-input').focus(); return; }
-    const tema = temas.find((t) => t.id === temaId);
-    if (!tema) return;
-    if (!tema.subtemas) tema.subtemas = [];
-    const novo = { id: uid('s'), titulo: val, acoes: [], criadoEm: Date.now() };
-    tema.subtemas.push(novo);
-    addingSubtema = false;
-    selectedSubtemaId = novo.id;
-    renderAll();
-    save();
-  }
-
-  function wireSubtemaCards(temaId) {
-    detailEl.querySelectorAll('[data-open-sub]').forEach((card) => card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-del-subtema]')) return;
-      selectedSubtemaId = card.getAttribute('data-open-sub');
-      renderAll();
-    }));
-    detailEl.querySelectorAll('[data-del-subtema]').forEach((btn) => btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      requestConfirm('subtema-' + btn.getAttribute('data-del-subtema'), () => removeSubtema(temaId, btn.getAttribute('data-del-subtema')));
-    }));
-  }
-
   function attachAcaoListeners(tema) {
     detailEl.querySelectorAll('[data-check]').forEach((el) =>
       el.addEventListener('change', () => toggleDone(tema.id, ctxOf(el), el.getAttribute('data-check')))
+    );
+    detailEl.querySelectorAll('[data-kebab]').forEach((el) =>
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = el.getAttribute('data-kebab');
+        openKebabId = openKebabId === id ? null : id;
+        renderDetail();
+      })
     );
     detailEl.querySelectorAll('[data-move-up]').forEach((el) =>
       el.addEventListener('click', () => moveAcao(tema.id, ctxOf(el), el.getAttribute('data-move-up'), -1))
@@ -797,10 +898,10 @@
       el.addEventListener('click', () => moveAcao(tema.id, ctxOf(el), el.getAttribute('data-move-down'), 1))
     );
     detailEl.querySelectorAll('[data-edit]').forEach((el) =>
-      el.addEventListener('click', () => { editingId = el.getAttribute('data-edit'); renderDetail(); })
+      el.addEventListener('click', () => { editingId = el.getAttribute('data-edit'); openKebabId = null; renderDetail(); })
     );
     detailEl.querySelectorAll('[data-del-acao]').forEach((el) =>
-      el.addEventListener('click', () => removeAcao(tema.id, ctxOf(el), el.getAttribute('data-del-acao')))
+      el.addEventListener('click', () => { openKebabId = null; removeAcao(tema.id, ctxOf(el), el.getAttribute('data-del-acao')); })
     );
     detailEl.querySelectorAll('[data-save-edit]').forEach((el) =>
       el.addEventListener('click', () => saveEdit(el.getAttribute('data-save-edit')))
@@ -810,6 +911,7 @@
     );
     attachDragHandlers(tema.id);
   }
+
 
   function attachDragHandlers(temaId) {
     detailEl.querySelectorAll('[data-drag]').forEach((handle) => {
@@ -862,22 +964,35 @@
     const descHtml = a.descricao
       ? escapeHtml(a.descricao)
       : '<span class="pm-acao-label empty">clique em editar para preencher</span>';
+    const chips =
+      (a.pessoa ? '<span class="pm-chip-mini">' + ICON_PERSON + escapeHtml(a.pessoa) + '</span>' : '') +
+      (a.data ? '<span class="pm-chip-mini ' + dateChipClass + '">' + ICON_CALENDAR + fmtDateLong(a.data) + (status === 'late' ? ' · atrasada' : '') + '</span>' : '');
 
     return (
       '<div class="pm-acao ' + (a.done ? 'done' : '') + (index === 1 ? ' first' : '') + '" data-acao-row="' + a.id + '" data-subtema-ctx="' + (subtemaId || '') + '">' +
       '<div class="pm-acao-row">' +
       '<span class="pm-drag-handle" draggable="true" data-drag="' + a.id + '" title="Arrastar para reordenar">⠿</span>' +
       '<div class="pm-check-wrap"><input class="pm-check" type="checkbox" data-check="' + a.id + '" ' + (a.done ? 'checked' : '') + ' /></div>' +
-      '<div class="pm-acao-text-wrap"><span class="pm-acao-label">' + descHtml + '</span></div>' +
-      '<div class="pm-acao-actions">' +
-      '<button class="pm-icon-btn" data-move-up="' + a.id + '" ' + (index === 1 ? 'disabled' : '') + ' title="Mover para cima">' + ICON_UP + '</button>' +
-      '<button class="pm-icon-btn" data-move-down="' + a.id + '" ' + (index === total ? 'disabled' : '') + ' title="Mover para baixo">' + ICON_DOWN + '</button>' +
-      '<button class="pm-icon-btn" data-edit="' + a.id + '" title="Editar">' + ICON_EDIT + '</button>' +
-      '<button class="pm-icon-btn danger" data-del-acao="' + a.id + '" title="Excluir">' + ICON_DEL + '</button>' +
+      '<div class="pm-acao-text-wrap">' +
+      '<div class="pm-acao-label">' + descHtml + '</div>' +
+      (chips ? '<div class="pm-acao-chips">' + chips + '</div>' : '') +
+      '</div>' +
+      '<div class="pm-kebab-wrap">' +
+      '<button class="pm-icon-btn" data-kebab="' + a.id + '" title="Mais opções">' + ICON_KEBAB + '</button>' +
+      (openKebabId === a.id ? kebabMenuHtml(a, index, total) : '') +
       '</div>' +
       '</div>' +
-      (a.pessoa ? '<div class="pm-sub-row"><span class="pm-sub-bullet">●</span> Responsável: <span class="pm-chip">' + escapeHtml(a.pessoa) + '</span></div>' : '') +
-      (a.data ? '<div class="pm-sub-row"><span class="pm-sub-bullet">●</span> Data prevista: <span class="pm-chip ' + dateChipClass + '">' + fmtDateLong(a.data) + '</span></div>' : '') +
+      '</div>'
+    );
+  }
+
+  function kebabMenuHtml(a, index, total) {
+    return (
+      '<div class="pm-kebab-menu">' +
+      '<button data-move-up="' + a.id + '" ' + (index === 1 ? 'disabled' : '') + '>Mover para cima</button>' +
+      '<button data-move-down="' + a.id + '" ' + (index === total ? 'disabled' : '') + '>Mover para baixo</button>' +
+      '<button class="divider" data-edit="' + a.id + '">Editar</button>' +
+      '<button class="danger" data-del-acao="' + a.id + '">Excluir</button>' +
       '</div>'
     );
   }
@@ -1006,6 +1121,13 @@
   });
 
   window.addEventListener('resize', applyLayout);
+
+  document.addEventListener('click', (e) => {
+    if (openKebabId && !e.target.closest('.pm-kebab-wrap')) {
+      openKebabId = null;
+      renderDetail();
+    }
+  });
 
   load();
 })();
