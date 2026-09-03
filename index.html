@@ -23,6 +23,8 @@
     --late-soft: #F6E4E1;
     --done: #4C7A5B;
     --done-soft: #E1EBE4;
+    --today: #A8781E;
+    --today-soft: #F3E9D4;
 
     background: var(--paper);
     color: var(--ink);
@@ -35,7 +37,35 @@
   }
   #pm-root * { box-sizing: border-box; }
 
-  .pm-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .pm-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; margin: 0 0 14px; letter-spacing: -0.01em; }
+
+  .pm-navtabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .pm-navtab { background: none; border: none; font-family: inherit; font-size: 14px; color: var(--ink-soft); padding: 9px 14px; cursor: pointer; border-radius: 6px 6px 0 0; margin-bottom: -1px; border-bottom: 2px solid transparent; }
+  .pm-navtab.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+  .pm-navtab:hover:not(.active) { color: var(--accent); }
+
+  .pm-painel-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .pm-painel-stat { background: var(--surface); border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(30,30,25,0.04); }
+  .pm-painel-stat .l { font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
+  .pm-painel-stat .n { font-size: 22px; font-weight: 600; }
+  .pm-painel-stat.late .n { color: var(--late); }
+  .pm-painel-stat.today .n { color: var(--today); }
+  .pm-painel-stat.done .n { color: var(--done); }
+
+  .pm-painel-section-title { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+  .pm-painel-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border-left: 3px solid var(--line); padding: 10px 12px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; }
+  .pm-painel-row:hover { box-shadow: 0 1px 2px rgba(30,30,25,0.06); }
+  .pm-painel-row.late { border-left-color: var(--late); }
+  .pm-painel-row.today { border-left-color: var(--today); }
+  .pm-painel-row.upcoming { border-left-color: var(--accent); }
+  .pm-painel-row-text { flex: 1; min-width: 0; font-size: 14px; }
+  .pm-tema-badge { font-size: 11px; background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .pm-painel-when { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+  .pm-painel-empty, .pm-search-empty { color: var(--ink-soft); font-size: 13.5px; text-align: center; padding: 30px 12px; }
+
+  .pm-search-input { width: 100%; font-family: inherit; font-size: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 16px; }
+  .pm-search-input:focus { outline: none; border-color: var(--accent); }
+
   .pm-stats { font-size: 13px; color: var(--ink-soft); margin: 0 0 18px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .pm-stats .dot { color: var(--ink-faint); }
   .pm-stats .n-late { color: var(--late); font-weight: 600; }
@@ -90,7 +120,11 @@
 
   .pm-acao { padding: 9px 0; border-top: 1px solid var(--line); }
   .pm-acao.first { border-top: none; padding-top: 0; }
-  .pm-acao-row { display: flex; align-items: flex-start; gap: 9px; }
+  .pm-acao.dragging { opacity: 0.4; }
+  .pm-acao.drag-over { border-top: 2px solid var(--accent); }
+  .pm-acao-row { display: flex; align-items: flex-start; gap: 7px; }
+  .pm-drag-handle { cursor: grab; color: var(--ink-faint); padding: 2px 0; flex-shrink: 0; font-size: 14px; line-height: 1; user-select: none; margin-top: 2px; }
+  .pm-drag-handle:active { cursor: grabbing; }
   .pm-check-wrap { position: relative; width: 17px; height: 17px; flex-shrink: 0; margin-top: 2px; }
   .pm-check { width: 17px; height: 17px; margin: 0; cursor: pointer; appearance: none; border: 1.5px solid var(--ink-faint); border-radius: 4px; background: #fff; }
   .pm-check:checked { background: var(--done); border-color: var(--done); }
@@ -114,6 +148,8 @@
   .pm-icon-btn:hover { color: var(--accent); background: var(--accent-soft); }
   .pm-icon-btn.danger:hover { color: var(--late); background: var(--late-soft); }
   .pm-icon-btn svg { width: 14px; height: 14px; }
+  .pm-icon-btn:disabled { opacity: 0.3; cursor: default; }
+  .pm-icon-btn:disabled:hover { color: var(--ink-faint); background: none; }
 
   .pm-edit-form { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 6px; padding: 10px; margin-top: 2px; }
   .pm-edit-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -125,20 +161,43 @@
 
   .pm-add-acao { background: none; border: none; color: var(--ink-soft); font-size: 13px; padding: 8px 0 2px; cursor: pointer; font-family: inherit; }
   .pm-add-acao:hover { color: var(--accent); }
+
+  .pm-section-title { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin: 18px 0 8px; }
+  .pm-sub-card { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; }
+  .pm-sub-card:hover { border-color: var(--accent); }
+  .pm-sub-card.has-late { border-left-color: var(--late); }
+  .pm-sub-card.has-progress { border-left-color: var(--accent); }
+  .pm-sub-card.all-done { border-left-color: var(--done); opacity: 0.82; }
+  .pm-icon-btn.confirming { color: #fff; background: var(--late); }
 </style>
 </head>
 <body>
 
 <div id="pm-root">
   <h1 class="pm-title">Registro de temas e ações</h1>
-  <div class="pm-stats" id="pm-stats">Carregando...</div>
-  <div class="pm-layout">
-    <div class="pm-menu" id="pm-menu">
-      <div id="pm-menu-list"></div>
-      <div id="pm-new-tema-wrap"></div>
-      <div class="pm-footer"><button class="pm-reset" id="pm-reset">Limpar tudo</button></div>
+  <div class="pm-navtabs" id="pm-navtabs">
+    <button class="pm-navtab" data-tab="painel">Painel</button>
+    <button class="pm-navtab" data-tab="temas">Temas</button>
+    <button class="pm-navtab" data-tab="buscar">Buscar</button>
+  </div>
+
+  <div class="pm-view" id="pm-view-painel"></div>
+
+  <div class="pm-view" id="pm-view-temas" style="display:none;">
+    <div class="pm-stats" id="pm-stats">Carregando...</div>
+    <div class="pm-layout">
+      <div class="pm-menu" id="pm-menu">
+        <div id="pm-menu-list"></div>
+        <div id="pm-new-tema-wrap"></div>
+        <div class="pm-footer"><button class="pm-reset" id="pm-reset">Limpar tudo</button></div>
+      </div>
+      <div class="pm-detail" id="pm-detail"></div>
     </div>
-    <div class="pm-detail" id="pm-detail"></div>
+  </div>
+
+  <div class="pm-view" id="pm-view-buscar" style="display:none;">
+    <input type="text" id="pm-search-input" class="pm-search-input" placeholder="Buscar por descrição, responsável ou tema..." />
+    <div id="pm-search-results"></div>
   </div>
 </div>
 
@@ -148,6 +207,8 @@
   const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
   const ICON_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
   const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  const ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
   const ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>';
 
   let temas = [];
@@ -156,6 +217,11 @@
   let confirmTarget = null;
   let confirmTimer = null;
   let selectedTemaId = null;
+  let selectedSubtemaId = null;
+  let addingSubtema = false;
+  let activeTab = 'painel';
+  let searchQuery = '';
+  let draggedAcaoId = null;
 
   const $ = (id) => document.getElementById(id);
   const menuListEl = $('pm-menu-list');
@@ -177,15 +243,43 @@
     return 'progress';
   }
 
-  function pctOf(tema) {
-    const total = tema.acoes.length;
-    if (!total) return 0;
-    const done = tema.acoes.filter((a) => a.done).length;
-    return Math.round((done / total) * 100);
+  function allAcoesOf(container) {
+    const nested = (container.subtemas || []).flatMap((s) => s.acoes);
+    return container.acoes.concat(nested);
   }
 
-  function isFullyDone(tema) {
-    return tema.acoes.length > 0 && pctOf(tema) === 100;
+  function pctOf(container) {
+    const all = allAcoesOf(container);
+    if (!all.length) return 0;
+    return Math.round((all.filter((a) => a.done).length / all.length) * 100);
+  }
+
+  function isFullyDone(container) {
+    const all = allAcoesOf(container);
+    return all.length > 0 && all.every((a) => a.done);
+  }
+
+  function getContainer(temaId, subtemaId) {
+    const tema = temas.find((t) => t.id === temaId);
+    if (!tema) return null;
+    if (!subtemaId) return tema;
+    return (tema.subtemas || []).find((s) => s.id === subtemaId) || null;
+  }
+
+  function findAcaoContainer(acaoId) {
+    for (const t of temas) {
+      if (t.acoes.find((a) => a.id === acaoId)) return t;
+      for (const s of (t.subtemas || [])) {
+        if (s.acoes.find((a) => a.id === acaoId)) return s;
+      }
+    }
+    return null;
+  }
+
+  function ctxOf(el) {
+    const row = el.closest('[data-subtema-ctx]');
+    if (!row) return null;
+    return row.getAttribute('data-subtema-ctx') || null;
   }
 
   function formatDuration(ms) {
@@ -199,11 +293,12 @@
 
   function syncCompletions() {
     temas.forEach((t) => {
-      if (isFullyDone(t)) {
-        if (!t.concluidoEm) t.concluidoEm = Date.now();
-      } else if (t.concluidoEm) {
-        delete t.concluidoEm;
-      }
+      (t.subtemas || []).forEach((s) => {
+        if (isFullyDone(s)) { if (!s.concluidoEm) s.concluidoEm = Date.now(); }
+        else if (s.concluidoEm) delete s.concluidoEm;
+      });
+      if (isFullyDone(t)) { if (!t.concluidoEm) t.concluidoEm = Date.now(); }
+      else if (t.concluidoEm) delete t.concluidoEm;
     });
   }
 
@@ -227,7 +322,15 @@
       temas = [];
     }
     let needsSave = false;
-    temas.forEach((t) => { if (!t.criadoEm) { t.criadoEm = Date.now(); needsSave = true; } });
+    temas.forEach((t) => {
+      if (!t.criadoEm) { t.criadoEm = Date.now(); needsSave = true; }
+      if (!t.acoes) { t.acoes = []; needsSave = true; }
+      if (!t.subtemas) { t.subtemas = []; needsSave = true; }
+      t.subtemas.forEach((s) => {
+        if (!s.criadoEm) { s.criadoEm = Date.now(); needsSave = true; }
+        if (!s.acoes) { s.acoes = []; needsSave = true; }
+      });
+    });
     renderAll();
     if (needsSave) save();
   }
@@ -253,9 +356,9 @@
     }
   }
 
-  function counts(tema) {
+  function counts(container) {
     let late = 0, progress = 0, done = 0;
-    tema.acoes.forEach((a) => {
+    allAcoesOf(container).forEach((a) => {
       const s = statusOf(a);
       if (s === 'late') late++; else if (s === 'progress') progress++; else done++;
     });
@@ -277,6 +380,151 @@
       (c.late ? '<span class="pm-badge b-late">' + c.late + ' atrasada' + (c.late > 1 ? 's' : '') + '</span>' : '') +
       (c.progress ? '<span class="pm-badge b-progress">' + c.progress + ' em andamento</span>' : '') +
       (c.done ? '<span class="pm-badge b-done">' + c.done + ' concluída' + (c.done > 1 ? 's' : '') + '</span>' : '')
+    );
+  }
+
+  // ---------------- Navegação entre abas ----------------
+  function switchTab(tab) {
+    activeTab = tab;
+    renderNavTabs();
+    applyTabVisibility();
+  }
+
+  function renderNavTabs() {
+    document.querySelectorAll('.pm-navtab').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === activeTab);
+    });
+  }
+
+  function applyTabVisibility() {
+    $('pm-view-painel').style.display = activeTab === 'painel' ? 'block' : 'none';
+    $('pm-view-temas').style.display = activeTab === 'temas' ? 'block' : 'none';
+    $('pm-view-buscar').style.display = activeTab === 'buscar' ? 'block' : 'none';
+    if (activeTab === 'temas') applyLayout();
+  }
+
+  function goToTema(temaId, subtemaId) {
+    selectedTemaId = temaId;
+    selectedSubtemaId = subtemaId || null;
+    activeTab = 'temas';
+    renderNavTabs();
+    renderAll();
+  }
+
+  // ---------------- Painel (prioridades por data) ----------------
+  function painelBuckets() {
+    const late = [], today = [], upcoming = [];
+    let doneCount = 0;
+    temas.forEach((t) => {
+      const walk = (arr, subtemaId, label) => arr.forEach((a) => {
+        if (a.done) { doneCount++; return; }
+        if (!a.data) return;
+        const d = daysUntil(a.data);
+        const entry = { a, temaId: t.id, subtemaId, label, d };
+        if (d < 0) late.push(entry);
+        else if (d === 0) today.push(entry);
+        else if (d <= 7) upcoming.push(entry);
+      });
+      walk(t.acoes, null, t.titulo);
+      (t.subtemas || []).forEach((s) => walk(s.acoes, s.id, t.titulo + ' › ' + s.titulo));
+    });
+    late.sort((x, y) => x.d - y.d);
+    upcoming.sort((x, y) => x.d - y.d);
+    return { late, today, upcoming, doneCount };
+  }
+
+  function statCardHtml(label, n, cls) {
+    return '<div class="pm-painel-stat ' + cls + '"><div class="l">' + label + '</div><div class="n">' + n + '</div></div>';
+  }
+
+  function painelRowHtml(entry, cls) {
+    const { a, temaId, subtemaId, label, d } = entry;
+    const when = cls === 'late'
+      ? Math.abs(d) + (Math.abs(d) === 1 ? ' dia atrasada' : ' dias atrasada')
+      : cls === 'today' ? 'hoje' : 'em ' + d + (d === 1 ? ' dia' : ' dias');
+    return (
+      '<div class="pm-painel-row ' + cls + '" data-goto-tema="' + temaId + '" data-goto-sub="' + (subtemaId || '') + '">' +
+      '<input class="pm-check" type="checkbox" data-painel-check="' + a.id + '" data-painel-tema="' + temaId + '" data-painel-sub="' + (subtemaId || '') + '" ' + (a.done ? 'checked' : '') + ' />' +
+      '<span class="pm-painel-row-text">' + escapeHtml(a.descricao || '(sem descrição)') + '</span>' +
+      '<span class="pm-tema-badge">' + escapeHtml(label) + '</span>' +
+      '<span class="pm-painel-when">' + when + '</span>' +
+      '</div>'
+    );
+  }
+
+  function renderPainel() {
+    const view = $('pm-view-painel');
+    if (!temas.length) {
+      view.innerHTML = '<div class="pm-painel-empty">Nenhum tema ainda. Vá até a aba "Temas" para criar o primeiro.</div>';
+      return;
+    }
+    const { late, today, upcoming, doneCount } = painelBuckets();
+    const sectionsHtml =
+      (late.length ? '<p class="pm-painel-section-title" style="color:var(--late);">Atrasadas</p>' + late.map((e) => painelRowHtml(e, 'late')).join('') : '') +
+      (today.length ? '<p class="pm-painel-section-title" style="color:var(--today);">Para hoje</p>' + today.map((e) => painelRowHtml(e, 'today')).join('') : '') +
+      (upcoming.length ? '<p class="pm-painel-section-title" style="color:var(--accent);">Próximos 7 dias</p>' + upcoming.map((e) => painelRowHtml(e, 'upcoming')).join('') : '');
+
+    view.innerHTML =
+      '<div class="pm-painel-stats">' +
+      statCardHtml('Atrasadas', late.length, 'late') +
+      statCardHtml('Para hoje', today.length, 'today') +
+      statCardHtml('Próximos 7 dias', upcoming.length, '') +
+      statCardHtml('Concluídas', doneCount, 'done') +
+      '</div>' +
+      (sectionsHtml || '<div class="pm-painel-empty">Nada urgente por agora.</div>');
+
+    view.querySelectorAll('[data-painel-check]').forEach((el) => {
+      el.addEventListener('click', (e) => e.stopPropagation());
+      el.addEventListener('change', () => {
+        toggleDone(el.getAttribute('data-painel-tema'), el.getAttribute('data-painel-sub') || null, el.getAttribute('data-painel-check'));
+      });
+    });
+    view.querySelectorAll('[data-goto-tema]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('[data-painel-check]')) return;
+        goToTema(el.getAttribute('data-goto-tema'), el.getAttribute('data-goto-sub') || null);
+      });
+    });
+  }
+
+  // ---------------- Busca ----------------
+  function renderBuscar() {
+    const resultsEl = $('pm-search-results');
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) { resultsEl.innerHTML = '<div class="pm-search-empty">Digite para buscar por descrição, responsável ou tema.</div>'; return; }
+
+    const matches = [];
+    temas.forEach((t) => {
+      t.acoes.forEach((a) => {
+        const hay = ((a.descricao || '') + ' ' + (a.pessoa || '') + ' ' + t.titulo).toLowerCase();
+        if (hay.includes(q)) matches.push({ a, temaId: t.id, subtemaId: null, label: t.titulo });
+      });
+      (t.subtemas || []).forEach((s) => s.acoes.forEach((a) => {
+        const hay = ((a.descricao || '') + ' ' + (a.pessoa || '') + ' ' + t.titulo + ' ' + s.titulo).toLowerCase();
+        if (hay.includes(q)) matches.push({ a, temaId: t.id, subtemaId: s.id, label: t.titulo + ' › ' + s.titulo });
+      }));
+    });
+
+    resultsEl.innerHTML = matches.length
+      ? matches.map((m) => searchRowHtml(m)).join('')
+      : '<div class="pm-search-empty">Nenhum resultado para "' + escapeHtml(searchQuery) + '".</div>';
+
+    resultsEl.querySelectorAll('[data-goto-tema]').forEach((el) =>
+      el.addEventListener('click', () => goToTema(el.getAttribute('data-goto-tema'), el.getAttribute('data-goto-sub') || null))
+    );
+  }
+
+  function searchRowHtml(m) {
+    const { a, temaId, subtemaId, label } = m;
+    const status = statusOf(a);
+    const dateChipClass = status === 'late' ? 'date-late' : status === 'progress' ? 'date-progress' : 'date-done';
+    return (
+      '<div class="pm-painel-row" data-goto-tema="' + temaId + '" data-goto-sub="' + (subtemaId || '') + '">' +
+      '<span class="pm-painel-row-text">' + escapeHtml(a.descricao || '(sem descrição)') +
+      (a.pessoa ? ' <span class="pm-chip">' + escapeHtml(a.pessoa) + '</span>' : '') + '</span>' +
+      '<span class="pm-tema-badge">' + escapeHtml(label) + '</span>' +
+      (a.data ? '<span class="pm-chip ' + dateChipClass + '">' + fmtDateLong(a.data) + '</span>' : '') +
+      '</div>'
     );
   }
 
@@ -313,7 +561,7 @@
         );
       }).join('');
       menuListEl.querySelectorAll('[data-select]').forEach((el) =>
-        el.addEventListener('click', () => { selectedTemaId = el.getAttribute('data-select'); renderAll(); })
+        el.addEventListener('click', () => { selectedTemaId = el.getAttribute('data-select'); selectedSubtemaId = null; renderAll(); })
       );
     }
     renderNewTemaForm();
@@ -377,12 +625,28 @@
       applyLayout();
       return;
     }
+    if (!tema.subtemas) tema.subtemas = [];
+    const subtema = selectedSubtemaId ? tema.subtemas.find((s) => s.id === selectedSubtemaId) : null;
+    if (selectedSubtemaId && !subtema) selectedSubtemaId = null;
+
+    if (subtema) renderSubtemaView(tema, subtema);
+    else renderTemaView(tema);
+  }
+
+  function renderTemaView(tema) {
     const c = counts(tema);
     const pct = pctOf(tema);
     const done = isFullyDone(tema);
-    const acoesHtml = tema.acoes.length
-      ? tema.acoes.map((a, i) => acaoHtml(tema, a, i + 1)).join('')
-      : '<div class="pm-detail-empty" style="padding:16px 4px;">Nenhuma ação neste tema ainda.</div>';
+    const directAcoesHtml = tema.acoes.length
+      ? tema.acoes.map((a, i) => acaoHtml(null, a, i + 1, tema.acoes.length)).join('')
+      : '<div class="pm-detail-empty" style="padding:10px 4px;">Nenhuma ação direta neste tema.</div>';
+
+    const orderedSubtemas = tema.subtemas.map((s, i) => ({ s, i })).sort((a, b) => {
+      const ad = isFullyDone(a.s) ? 1 : 0, bd = isFullyDone(b.s) ? 1 : 0;
+      if (ad !== bd) return ad - bd;
+      return a.i - b.i;
+    }).map((x) => x.s);
+    const subtemasHtml = orderedSubtemas.map((s) => subtemaCardHtml(s)).join('');
 
     detailEl.innerHTML =
       '<button class="pm-back" id="pm-back" style="display:' + (isNarrow() ? 'flex' : 'none') + ';">' + ICON_BACK + ' Voltar aos temas</button>' +
@@ -396,23 +660,147 @@
         ? '<div class="pm-menu-done-text" style="margin-bottom:12px;">Concluído em ' + formatDuration(tema.concluidoEm - tema.criadoEm) + '</div>'
         : '<div class="pm-detail-badges"><span class="pm-menu-pct-row" style="margin:0;">' + pct + '% concluído</span>' + badgesHtml(c) + '</div>')
       +
-      acoesHtml +
+      '<p class="pm-section-title" style="margin-top:0;">Ações diretas</p>' +
+      directAcoesHtml +
       '<button class="pm-add-acao" id="pm-add-acao">+ Nova ação</button>' +
+      '<p class="pm-section-title">Subtemas</p>' +
+      subtemasHtml +
+      addSubtemaControlHtml() +
       '</div>';
 
     $('pm-back').addEventListener('click', () => { selectedTemaId = null; renderAll(); });
     $('pm-tema-title').addEventListener('blur', (e) => renameTema(tema.id, e.target.value));
     $('pm-tema-del').addEventListener('click', () => requestConfirm('tema-' + tema.id, () => removeTema(tema.id)));
-    $('pm-add-acao').addEventListener('click', () => addAcao(tema.id));
+    $('pm-add-acao').addEventListener('click', () => addAcao(tema.id, null));
+    wireAddSubtemaControl(tema.id);
+    wireSubtemaCards(tema.id);
+    attachAcaoListeners(tema);
 
+    applyLayout();
+  }
+
+  function renderSubtemaView(tema, subtema) {
+    const c = counts(subtema);
+    const pct = pctOf(subtema);
+    const done = isFullyDone(subtema);
+    const acoesHtml = subtema.acoes.length
+      ? subtema.acoes.map((a, i) => acaoHtml(subtema.id, a, i + 1, subtema.acoes.length)).join('')
+      : '<div class="pm-detail-empty" style="padding:16px 4px;">Nenhuma ação neste subtema ainda.</div>';
+
+    detailEl.innerHTML =
+      '<button class="pm-back" id="pm-back-sub" style="display:flex;">' + ICON_BACK + ' ' + escapeHtml(tema.titulo) + '</button>' +
+      '<div class="pm-detail-card">' +
+      '<div class="pm-detail-head">' +
+      '<input class="pm-tema-title-input" id="pm-subtema-title" value="' + escapeHtml(subtema.titulo) + '" />' +
+      '<button class="pm-tema-del ' + (confirmTarget === 'subtema-' + subtema.id ? 'confirming' : '') + '" id="pm-subtema-del" title="' + (confirmTarget === 'subtema-' + subtema.id ? 'Clique novamente para confirmar' : 'Excluir subtema') + '">' + ICON_X + '</button>' +
+      '</div>' +
+      '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + (done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)')) + ';"></div></div>' +
+      (done
+        ? '<div class="pm-menu-done-text" style="margin-bottom:12px;">Concluído em ' + formatDuration(subtema.concluidoEm - subtema.criadoEm) + '</div>'
+        : '<div class="pm-detail-badges"><span class="pm-menu-pct-row" style="margin:0;">' + pct + '% concluído</span>' + badgesHtml(c) + '</div>')
+      +
+      acoesHtml +
+      '<button class="pm-add-acao" id="pm-add-acao">+ Nova ação</button>' +
+      '</div>';
+
+    $('pm-back-sub').addEventListener('click', () => { selectedSubtemaId = null; renderAll(); });
+    $('pm-subtema-title').addEventListener('blur', (e) => renameSubtema(tema.id, subtema.id, e.target.value));
+    $('pm-subtema-del').addEventListener('click', () => requestConfirm('subtema-' + subtema.id, () => removeSubtema(tema.id, subtema.id)));
+    $('pm-add-acao').addEventListener('click', () => addAcao(tema.id, subtema.id));
+    attachAcaoListeners(tema);
+
+    applyLayout();
+  }
+
+  function subtemaCardHtml(s) {
+    const c = counts(s);
+    const pct = pctOf(s);
+    const done = isFullyDone(s);
+    let cls = '';
+    if (done) cls = 'all-done'; else if (c.late) cls = 'has-late'; else if (c.progress) cls = 'has-progress';
+    const barColor = done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)');
+    return (
+      '<div class="pm-sub-card ' + cls + '" data-open-sub="' + s.id + '">' +
+      '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">' +
+      '<div class="pm-menu-item-title" style="margin-bottom:8px;">' + escapeHtml(s.titulo) + '</div>' +
+      '<button class="pm-icon-btn ' + (confirmTarget === 'subtema-' + s.id ? 'confirming' : '') + '" data-del-subtema="' + s.id + '" title="Excluir subtema">' + ICON_X + '</button>' +
+      '</div>' +
+      '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + barColor + ';"></div></div>' +
+      (done
+        ? '<div class="pm-menu-done-text">Concluído em ' + formatDuration(s.concluidoEm - s.criadoEm) + '</div>'
+        : '<div class="pm-menu-pct-row">' + pct + '% concluído</div><div class="pm-menu-badges">' + (badgesHtml(c) || '<span class="pm-badge" style="background:var(--chip); color:var(--ink-soft);">sem ações</span>') + '</div>')
+      +
+      '</div>'
+    );
+  }
+
+  function addSubtemaControlHtml() {
+    if (!addingSubtema) {
+      return '<button class="pm-add-tema" id="pm-add-subtema">+ Novo subtema</button>';
+    }
+    return (
+      '<div class="pm-new-tema-form">' +
+      '<input type="text" id="pm-new-subtema-input" placeholder="Nome do subtema" />' +
+      '<div class="pm-new-tema-actions">' +
+      '<button class="pm-e-cancel" id="pm-new-subtema-cancel">Cancelar</button>' +
+      '<button class="pm-e-save" id="pm-new-subtema-save">Adicionar</button>' +
+      '</div></div>'
+    );
+  }
+
+  function wireAddSubtemaControl(temaId) {
+    if (!addingSubtema) {
+      $('pm-add-subtema').addEventListener('click', () => { addingSubtema = true; renderDetail(); });
+    } else {
+      const input = $('pm-new-subtema-input');
+      input.focus();
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmNewSubtema(temaId); });
+      $('pm-new-subtema-cancel').addEventListener('click', () => { addingSubtema = false; renderDetail(); });
+      $('pm-new-subtema-save').addEventListener('click', () => confirmNewSubtema(temaId));
+    }
+  }
+
+  function confirmNewSubtema(temaId) {
+    const val = $('pm-new-subtema-input').value.trim();
+    if (!val) { $('pm-new-subtema-input').focus(); return; }
+    const tema = temas.find((t) => t.id === temaId);
+    if (!tema) return;
+    if (!tema.subtemas) tema.subtemas = [];
+    const novo = { id: uid('s'), titulo: val, acoes: [], criadoEm: Date.now() };
+    tema.subtemas.push(novo);
+    addingSubtema = false;
+    selectedSubtemaId = novo.id;
+    renderAll();
+    save();
+  }
+
+  function wireSubtemaCards(temaId) {
+    detailEl.querySelectorAll('[data-open-sub]').forEach((card) => card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-del-subtema]')) return;
+      selectedSubtemaId = card.getAttribute('data-open-sub');
+      renderAll();
+    }));
+    detailEl.querySelectorAll('[data-del-subtema]').forEach((btn) => btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      requestConfirm('subtema-' + btn.getAttribute('data-del-subtema'), () => removeSubtema(temaId, btn.getAttribute('data-del-subtema')));
+    }));
+  }
+
+  function attachAcaoListeners(tema) {
     detailEl.querySelectorAll('[data-check]').forEach((el) =>
-      el.addEventListener('change', () => toggleDone(tema.id, el.getAttribute('data-check')))
+      el.addEventListener('change', () => toggleDone(tema.id, ctxOf(el), el.getAttribute('data-check')))
+    );
+    detailEl.querySelectorAll('[data-move-up]').forEach((el) =>
+      el.addEventListener('click', () => moveAcao(tema.id, ctxOf(el), el.getAttribute('data-move-up'), -1))
+    );
+    detailEl.querySelectorAll('[data-move-down]').forEach((el) =>
+      el.addEventListener('click', () => moveAcao(tema.id, ctxOf(el), el.getAttribute('data-move-down'), 1))
     );
     detailEl.querySelectorAll('[data-edit]').forEach((el) =>
       el.addEventListener('click', () => { editingId = el.getAttribute('data-edit'); renderDetail(); })
     );
     detailEl.querySelectorAll('[data-del-acao]').forEach((el) =>
-      el.addEventListener('click', () => removeAcao(tema.id, el.getAttribute('data-del-acao')))
+      el.addEventListener('click', () => removeAcao(tema.id, ctxOf(el), el.getAttribute('data-del-acao')))
     );
     detailEl.querySelectorAll('[data-save-edit]').forEach((el) =>
       el.addEventListener('click', () => saveEdit(el.getAttribute('data-save-edit')))
@@ -420,11 +808,53 @@
     detailEl.querySelectorAll('[data-cancel-edit]').forEach((el) =>
       el.addEventListener('click', () => { editingId = null; renderDetail(); })
     );
-
-    applyLayout();
+    attachDragHandlers(tema.id);
   }
 
-  function acaoHtml(tema, a, index) {
+  function attachDragHandlers(temaId) {
+    detailEl.querySelectorAll('[data-drag]').forEach((handle) => {
+      handle.addEventListener('dragstart', (e) => {
+        draggedAcaoId = handle.getAttribute('data-drag');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedAcaoId);
+        const row = handle.closest('[data-acao-row]');
+        if (row) row.classList.add('dragging');
+      });
+      handle.addEventListener('dragend', () => {
+        draggedAcaoId = null;
+        detailEl.querySelectorAll('.pm-acao').forEach((r) => { r.classList.remove('dragging'); r.classList.remove('drag-over'); });
+      });
+    });
+    detailEl.querySelectorAll('[data-acao-row]').forEach((row) => {
+      row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!draggedAcaoId) return;
+        row.classList.add('drag-over');
+      });
+      row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+      row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        row.classList.remove('drag-over');
+        const targetId = row.getAttribute('data-acao-row');
+        if (!draggedAcaoId || draggedAcaoId === targetId) return;
+        reorderAcao(temaId, ctxOf(row), draggedAcaoId, targetId);
+      });
+    });
+  }
+
+  function reorderAcao(temaId, subtemaId, draggedId, targetId) {
+    const c = getContainer(temaId, subtemaId);
+    if (!c) return;
+    const fromIdx = c.acoes.findIndex((a) => a.id === draggedId);
+    if (fromIdx === -1) return;
+    const [item] = c.acoes.splice(fromIdx, 1);
+    const toIdx = c.acoes.findIndex((a) => a.id === targetId);
+    c.acoes.splice(toIdx === -1 ? c.acoes.length : toIdx, 0, item);
+    renderDetail();
+    save();
+  }
+
+  function acaoHtml(subtemaId, a, index, total) {
     if (editingId === a.id) return editFormHtml(a, index);
 
     const status = statusOf(a);
@@ -434,11 +864,14 @@
       : '<span class="pm-acao-label empty">clique em editar para preencher</span>';
 
     return (
-      '<div class="pm-acao ' + (a.done ? 'done' : '') + (index === 1 ? ' first' : '') + '">' +
+      '<div class="pm-acao ' + (a.done ? 'done' : '') + (index === 1 ? ' first' : '') + '" data-acao-row="' + a.id + '" data-subtema-ctx="' + (subtemaId || '') + '">' +
       '<div class="pm-acao-row">' +
+      '<span class="pm-drag-handle" draggable="true" data-drag="' + a.id + '" title="Arrastar para reordenar">⠿</span>' +
       '<div class="pm-check-wrap"><input class="pm-check" type="checkbox" data-check="' + a.id + '" ' + (a.done ? 'checked' : '') + ' /></div>' +
       '<div class="pm-acao-text-wrap"><span class="pm-acao-label">' + descHtml + '</span></div>' +
       '<div class="pm-acao-actions">' +
+      '<button class="pm-icon-btn" data-move-up="' + a.id + '" ' + (index === 1 ? 'disabled' : '') + ' title="Mover para cima">' + ICON_UP + '</button>' +
+      '<button class="pm-icon-btn" data-move-down="' + a.id + '" ' + (index === total ? 'disabled' : '') + ' title="Mover para baixo">' + ICON_DOWN + '</button>' +
       '<button class="pm-icon-btn" data-edit="' + a.id + '" title="Editar">' + ICON_EDIT + '</button>' +
       '<button class="pm-icon-btn danger" data-del-acao="' + a.id + '" title="Excluir">' + ICON_DEL + '</button>' +
       '</div>' +
@@ -469,24 +902,44 @@
     );
   }
 
-  function toggleDone(temaId, acaoId) {
-    const tema = temas.find((t) => t.id === temaId);
-    const a = tema && tema.acoes.find((x) => x.id === acaoId);
+  function toggleDone(temaId, subtemaId, acaoId) {
+    const c = getContainer(temaId, subtemaId);
+    const a = c && c.acoes.find((x) => x.id === acaoId);
     if (a) a.done = !a.done;
     renderAll();
     save();
   }
 
-  function removeAcao(temaId, acaoId) {
-    const tema = temas.find((t) => t.id === temaId);
-    if (tema) tema.acoes = tema.acoes.filter((x) => x.id !== acaoId);
+  function moveAcao(temaId, subtemaId, acaoId, dir) {
+    const c = getContainer(temaId, subtemaId);
+    if (!c) return;
+    const idx = c.acoes.findIndex((a) => a.id === acaoId);
+    const newIdx = idx + dir;
+    if (idx === -1 || newIdx < 0 || newIdx >= c.acoes.length) return;
+    const [item] = c.acoes.splice(idx, 1);
+    c.acoes.splice(newIdx, 0, item);
+    renderDetail();
+    save();
+  }
+
+  function removeAcao(temaId, subtemaId, acaoId) {
+    const c = getContainer(temaId, subtemaId);
+    if (c) c.acoes = c.acoes.filter((x) => x.id !== acaoId);
     renderAll();
     save();
   }
 
   function removeTema(temaId) {
     temas = temas.filter((t) => t.id !== temaId);
-    if (selectedTemaId === temaId) selectedTemaId = null;
+    if (selectedTemaId === temaId) { selectedTemaId = null; selectedSubtemaId = null; }
+    renderAll();
+    save();
+  }
+
+  function removeSubtema(temaId, subtemaId) {
+    const tema = temas.find((t) => t.id === temaId);
+    if (tema) tema.subtemas = (tema.subtemas || []).filter((s) => s.id !== subtemaId);
+    if (selectedSubtemaId === subtemaId) selectedSubtemaId = null;
     renderAll();
     save();
   }
@@ -498,26 +951,32 @@
     save();
   }
 
-  function addAcao(temaId) {
+  function renameSubtema(temaId, subtemaId, novoTitulo) {
     const tema = temas.find((t) => t.id === temaId);
-    if (!tema) return;
+    const s = tema && (tema.subtemas || []).find((x) => x.id === subtemaId);
+    if (s && novoTitulo.trim()) s.titulo = novoTitulo.trim();
+    renderMenu();
+    save();
+  }
+
+  function addAcao(temaId, subtemaId) {
+    const c = getContainer(temaId, subtemaId);
+    if (!c) return;
     const novaAcao = { id: uid('a'), descricao: '', pessoa: '', data: '', done: false };
-    tema.acoes.push(novaAcao);
+    c.acoes.push(novaAcao);
     editingId = novaAcao.id;
     renderDetail();
   }
 
   function saveEdit(acaoId) {
-    for (const tema of temas) {
-      const a = tema.acoes.find((x) => x.id === acaoId);
-      if (a) {
-        const desc = $('pm-f-desc-' + acaoId).value.trim();
-        if (!desc) { $('pm-f-desc-' + acaoId).focus(); return; }
-        a.descricao = desc;
-        a.pessoa = $('pm-f-pessoa-' + acaoId).value.trim();
-        a.data = $('pm-f-data-' + acaoId).value;
-        break;
-      }
+    const c = findAcaoContainer(acaoId);
+    if (c) {
+      const a = c.acoes.find((x) => x.id === acaoId);
+      const desc = $('pm-f-desc-' + acaoId).value.trim();
+      if (!desc) { $('pm-f-desc-' + acaoId).focus(); return; }
+      a.descricao = desc;
+      a.pessoa = $('pm-f-pessoa-' + acaoId).value.trim();
+      a.data = $('pm-f-data-' + acaoId).value;
     }
     editingId = null;
     renderAll();
@@ -530,11 +989,20 @@
     renderStats();
     renderMenu();
     renderDetail();
-    applyLayout();
+    renderPainel();
+    renderBuscar();
+    applyTabVisibility();
   }
 
+  document.querySelectorAll('.pm-navtab').forEach((btn) =>
+    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')))
+  );
+  $('pm-search-input').addEventListener('input', (e) => { searchQuery = e.target.value; renderBuscar(); });
+  renderNavTabs();
+  applyTabVisibility();
+
   $('pm-reset').addEventListener('click', () => {
-    requestConfirm('reset', () => { temas = []; selectedTemaId = null; renderAll(); save(); });
+    requestConfirm('reset', () => { temas = []; selectedTemaId = null; selectedSubtemaId = null; renderAll(); save(); });
   });
 
   window.addEventListener('resize', applyLayout);
