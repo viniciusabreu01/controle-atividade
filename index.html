@@ -616,11 +616,12 @@
           renderMenu();
         })
       );
-      menuListEl.querySelectorAll('[data-link-target]').forEach((el) =>
-        el.addEventListener('click', (e) => {
+      menuListEl.querySelectorAll('[data-link-select]').forEach((el) =>
+        el.addEventListener('change', (e) => {
           e.stopPropagation();
-          const [temaId, targetId] = el.getAttribute('data-link-target').split(':');
-          convertTemaToSubtema(temaId, targetId);
+          const t = el.getAttribute('data-link-select');
+          const chosen = e.target.value;
+          if (chosen) convertTemaToSubtema(chosen, t);
         })
       );
       menuListEl.querySelectorAll('[data-add-subtema-inline]').forEach((el) =>
@@ -696,10 +697,14 @@
     if (!others.length) {
       return '<div class="pm-link-panel"><div class="pm-link-panel-empty">Crie outro tema primeiro.</div></div>';
     }
+    const options = others.map((o) => '<option value="' + o.id + '">' + escapeHtml(o.titulo) + '</option>').join('');
     return (
       '<div class="pm-link-panel">' +
       '<div class="pm-link-panel-label">Trazer como subtema de "' + escapeHtml(t.titulo) + '":</div>' +
-      others.map((o) => '<div class="pm-link-option" data-link-target="' + o.id + ':' + t.id + '">' + escapeHtml(o.titulo) + '</div>').join('') +
+      '<select class="pm-sub-select" data-link-select="' + t.id + '">' +
+      '<option value="" selected disabled>Selecione um tema…</option>' +
+      options +
+      '</select>' +
       '</div>'
     );
   }
