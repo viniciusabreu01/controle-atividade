@@ -601,6 +601,13 @@
           renderAll();
         })
       );
+      menuListEl.querySelectorAll('[data-unlink-subtema-inline]').forEach((el) =>
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const [temaId, subId] = el.getAttribute('data-unlink-subtema-inline').split(':');
+          requestConfirm('subtema-' + subId, () => convertSubtemaToTema(temaId, subId));
+        })
+      );
       menuListEl.querySelectorAll('[data-link-tema]').forEach((el) =>
         el.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -643,7 +650,7 @@
       '<div class="pm-menu-item-top">' +
       '<span class="pm-menu-item-title">' + escapeHtml(t.titulo) + '</span>' +
       '<span class="pm-menu-item-icons">' +
-      (temas.length > 1 ? '<button class="pm-icon-btn" data-link-tema="' + t.id + '" title="Tornar subtema de...">' + ICON_LINK + '</button>' : '') +
+      (temas.length > 1 ? '<button class="pm-icon-btn" data-link-tema="' + t.id + '" title="Trazer outro tema como subtema">' + ICON_LINK + '</button>' : '') +
       '<span class="pm-chevron ' + (expanded ? 'up' : '') + '">' + ICON_CHEVRON + '</span>' +
       '</span>' +
       '</div>' +
@@ -670,11 +677,17 @@
       const sel = s.id === selectedSubtemaId ? 'selected' : '';
       return '<option value="' + s.id + '" ' + sel + '>' + escapeHtml(s.titulo) + ' — ' + pct + '%</option>';
     }).join('');
+    const delBtn = selectedSubtemaId
+      ? '<button class="pm-icon-btn ' + (confirmTarget === 'subtema-' + selectedSubtemaId ? 'confirming' : '') + '" data-unlink-subtema-inline="' + t.id + ':' + selectedSubtemaId + '" title="' + (confirmTarget === 'subtema-' + selectedSubtemaId ? 'Clique novamente para confirmar' : 'Desvincular (volta a ser um tema)') + '">' + ICON_LINK + '</button>'
+      : '';
     return (
-      '<select class="pm-sub-select" data-subtema-select="' + t.id + '">' +
+      '<div style="display:flex; gap:6px; align-items:center;">' +
+      '<select class="pm-sub-select" data-subtema-select="' + t.id + '" style="flex:1;">' +
       '<option value="" ' + (selectedSubtemaId ? '' : 'selected') + '>Ações diretas do tema</option>' +
       options +
-      '</select>'
+      '</select>' +
+      delBtn +
+      '</div>'
     );
   }
 
@@ -685,8 +698,8 @@
     }
     return (
       '<div class="pm-link-panel">' +
-      '<div class="pm-link-panel-label">Tornar subtema de:</div>' +
-      others.map((o) => '<div class="pm-link-option" data-link-target="' + t.id + ':' + o.id + '">' + escapeHtml(o.titulo) + '</div>').join('') +
+      '<div class="pm-link-panel-label">Trazer como subtema de "' + escapeHtml(t.titulo) + '":</div>' +
+      others.map((o) => '<div class="pm-link-option" data-link-target="' + o.id + ':' + t.id + '">' + escapeHtml(o.titulo) + '</div>').join('') +
       '</div>'
     );
   }
@@ -703,6 +716,21 @@
     linkingTemaId = null;
     selectedTemaId = targetId;
     selectedSubtemaId = novoSub.id;
+    renderAll();
+    save();
+  }
+
+  function convertSubtemaToTema(temaId, subtemaId) {
+    const tema = temas.find((t) => t.id === temaId);
+    if (!tema) return;
+    const idx = (tema.subtemas || []).findIndex((s) => s.id === subtemaId);
+    if (idx === -1) return;
+    const sub = tema.subtemas[idx];
+    tema.subtemas.splice(idx, 1);
+    const novoTema = { id: uid('t'), titulo: sub.titulo, acoes: sub.acoes, subtemas: [], criadoEm: sub.criadoEm };
+    temas.push(novoTema);
+    selectedTemaId = novoTema.id;
+    selectedSubtemaId = null;
     renderAll();
     save();
   }
@@ -858,7 +886,7 @@
       '<div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">' + escapeHtml(tema.titulo) + '</div>' +
       '<div class="pm-detail-head">' +
       '<input class="pm-tema-title-input" id="pm-subtema-title" value="' + escapeHtml(subtema.titulo) + '" />' +
-      '<button class="pm-tema-del ' + (confirmTarget === 'subtema-' + subtema.id ? 'confirming' : '') + '" id="pm-subtema-del" title="' + (confirmTarget === 'subtema-' + subtema.id ? 'Clique novamente para confirmar' : 'Excluir subtema') + '">' + ICON_X + '</button>' +
+      '<button class="pm-tema-del ' + (confirmTarget === 'subtema-' + subtema.id ? 'confirming' : '') + '" id="pm-subtema-del" title="' + (confirmTarget === 'subtema-' + subtema.id ? 'Clique novamente para confirmar' : 'Desvincular (volta a ser um tema)') + '">' + ICON_LINK + '</button>' +
       '</div>' +
       '<div class="pm-progress-track"><div class="pm-progress-fill" style="width:' + pct + '%; background:' + (done ? 'var(--done)' : (c.late ? 'var(--late)' : 'var(--accent)')) + ';"></div></div>' +
       (done
@@ -871,7 +899,7 @@
 
     $('pm-back').addEventListener('click', () => { mobileMenuOpen = true; renderAll(); });
     $('pm-subtema-title').addEventListener('blur', (e) => renameSubtema(tema.id, subtema.id, e.target.value));
-    $('pm-subtema-del').addEventListener('click', () => requestConfirm('subtema-' + subtema.id, () => removeSubtema(tema.id, subtema.id)));
+    $('pm-subtema-del').addEventListener('click', () => requestConfirm('subtema-' + subtema.id, () => convertSubtemaToTema(tema.id, subtema.id)));
     $('pm-add-acao').addEventListener('click', () => addAcao(tema.id, subtema.id));
     attachAcaoListeners(tema);
 
